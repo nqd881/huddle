@@ -1,0 +1,30 @@
+apiVersion: skaffold/v4beta8
+kind: Config
+metadata:
+  name: huddle
+manifests:
+  rawYaml:
+    - "./k8s/ingress/*.yml"
+    - "./k8s/web-deployment.yml"
+    - "./k8s/test-deployment.yml"
+build:
+  local:
+    useDockerCLI: false
+    useBuildkit: true
+  artifacts:
+    - image: huddle-web-service-dev
+      context: ./services/web-service
+      sync:
+        infer:
+          - "**/*"
+      docker:
+        dockerfile: Dockerfile.dev
+    - image: huddle-test-service-dev
+      context: ./services/test-service
+      sync:
+        infer:
+          - "**/*"
+      docker:
+        dockerfile: Dockerfile.dev
+deploy:
+  kubectl: {}

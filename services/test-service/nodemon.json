@@ -1,0 +1,14 @@
+{
+  "restartable": "rs",
+  "verbose": true,
+  "ignore": [
+    ".git",
+    "node_modules",
+    "dist",
+    "Dockerfile",
+    "Dockerfile.dev",
+    ".dockerignore"
+  ],
+  "exec": "ts-node index.ts",
+  "ext": "ts"
+}
