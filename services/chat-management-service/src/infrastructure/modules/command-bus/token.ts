@@ -1,2 +1,4 @@
-export const COMMAND_BUS_MODULE_OPTIONS = Symbol.for("CommandBusModuleOptions");
-export const COMMAND_HANDLERS = Symbol.for("CommandHandlers");
+import { providerToken } from "../../utils/provider-token";
+
+export const COMMAND_BUS_OPTIONS = providerToken("CommandBusOptions");
+export const COMMAND_HANDLERS = providerToken("CommandHandlers");

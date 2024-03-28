@@ -1,20 +1,13 @@
-import { ModuleMetadata, Type } from "@nestjs/common";
-import { ICommandHandler } from "../../../application/interfaces";
+import { ICommand, ICommandHandler } from "../../../application/interfaces";
 
-export interface CommandBusModuleOptions {
-  handlers: ICommandHandler[];
+export interface ICommandBus<CommandBase extends ICommand = ICommand> {
+  registerHandler<T extends CommandBase>(handler: ICommandHandler<T>): void;
+
+  registerHandlers(handlers: ICommandHandler[]): void;
+
+  executeCommand<T extends CommandBase>(command: T): Promise<any>;
 }
 
-export interface CommandBusModuleOptionsFactory {
-  build(): CommandBusModuleOptions | Promise<CommandBusModuleOptions>;
-}
-
-export interface CommandBusModuleAsyncOptions
-  extends Pick<ModuleMetadata, "imports"> {
-  useExisting?: Type<CommandBusModuleOptionsFactory>;
-  useClass?: Type<CommandBusModuleOptionsFactory>;
-  useFactory?: (
-    ...args: any[]
-  ) => CommandBusModuleOptions | Promise<CommandBusModuleOptions>;
-  inject?: any[];
+export interface ICommandHandlerProvider {
+  getCommandHandlers(): ICommandHandler[];
 }

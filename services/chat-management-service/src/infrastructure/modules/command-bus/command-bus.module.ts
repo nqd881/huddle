@@ -1,29 +1,66 @@
-import { DynamicModule, Module, Provider } from "@nestjs/common";
+import { DiscoveryModule, DiscoveryService } from "@golevelup/nestjs-discovery";
+import { DynamicModule, Module, OnModuleInit, Provider } from "@nestjs/common";
 import { ICommandHandler } from "../../../application/interfaces";
-import { CommandBusService } from "./command-bus.service";
+import { CommandBus } from "./command-bus";
+import { CommandHandlerProviderMetaKey } from "./decorator";
+import { ICommandHandlerProvider } from "./interface";
 import {
   CommandBusModuleAsyncOptions,
   CommandBusModuleOptions,
-  CommandBusModuleOptionsFactory,
-} from "./interface";
-import { COMMAND_BUS_MODULE_OPTIONS, COMMAND_HANDLERS } from "./token";
+  CommandBusOptionsFactory,
+} from "./options";
+import { COMMAND_BUS_OPTIONS, COMMAND_HANDLERS } from "./token";
 
-@Module({})
-export class CommandBusModule {
+@Module({
+  imports: [DiscoveryModule],
+  providers: [CommandBus],
+  exports: [CommandBus],
+})
+export class CommandBusModule implements OnModuleInit {
+  constructor(
+    private discoveryService: DiscoveryService,
+    private commandBus: CommandBus
+  ) {}
+
+  async onModuleInit() {
+    const commandHandlerProviders =
+      await this.discoveryService.providersWithMetaAtKey(
+        CommandHandlerProviderMetaKey
+      );
+
+    commandHandlerProviders.forEach(({ meta, discoveredClass }) => {
+      this.commandBus.registerHandlers(
+        (
+          discoveredClass.instance as ICommandHandlerProvider
+        ).getCommandHandlers()
+      );
+    });
+  }
+
+  static forRoot(handlers?: ICommandHandler[], global?: boolean): DynamicModule;
+  static forRoot(options?: CommandBusModuleOptions): DynamicModule;
   static forRoot(
-    options: ICommandHandler[] | CommandBusModuleOptions
+    p1?: ICommandHandler[] | CommandBusModuleOptions,
+    p2?: boolean
   ): DynamicModule {
-    const handlers: ICommandHandler[] = Array.isArray(options)
-      ? options
-      : options.handlers;
+    const handlers: ICommandHandler[] = p1
+      ? Array.isArray(p1)
+        ? p1
+        : p1.handlers ?? []
+      : [];
+
+    const global = p1
+      ? !Array.isArray(p1)
+        ? p1.global
+        : p2
+        ? p2
+        : false
+      : false;
 
     return {
       module: CommandBusModule,
-      providers: [
-        { provide: COMMAND_HANDLERS, useValue: handlers },
-        CommandBusService,
-      ],
-      exports: [CommandBusService],
+      providers: [{ provide: COMMAND_HANDLERS, useValue: handlers }],
+      global,
     };
   }
 
@@ -33,8 +70,8 @@ export class CommandBusModule {
     return {
       module: CommandBusModule,
       imports: [...(options?.imports || [])],
-      providers: [...providers, CommandBusService],
-      exports: [CommandBusService],
+      providers,
+      global: options.global,
     };
   }
 
@@ -44,7 +81,7 @@ export class CommandBusModule {
     if (options.useFactory) {
       return [
         {
-          provide: COMMAND_BUS_MODULE_OPTIONS,
+          provide: COMMAND_BUS_OPTIONS,
           useFactory: options.useFactory,
           inject: options?.inject || [],
         },
@@ -53,21 +90,18 @@ export class CommandBusModule {
           useFactory: (options: CommandBusModuleOptions) => {
             return options.handlers;
           },
-          inject: [COMMAND_BUS_MODULE_OPTIONS],
+          inject: [COMMAND_BUS_OPTIONS],
         },
       ];
     }
 
-    if (options.useClass || options.useExisting) {
+    if (options.useClass) {
       return [
         {
-          provide: COMMAND_BUS_MODULE_OPTIONS,
-          useFactory: async (
-            optionsFactory: CommandBusModuleOptionsFactory
-          ) => {
-            return optionsFactory.build();
-          },
-          inject: [(options?.useClass || options?.useExisting)!],
+          provide: COMMAND_BUS_OPTIONS,
+          useFactory: (optionsFactory: CommandBusOptionsFactory) =>
+            optionsFactory.build(),
+          inject: [options.useClass],
         },
       ];
     }

@@ -1,28 +1,21 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
+import { CommandBus } from "../command-bus/command-bus";
 import { CreateFolderCommand } from "../../../application/services/folder-service/create-folder";
-import { CommandBusService } from "../command-bus/command-bus.service";
-import { FolderRequest } from "./interfaces";
-import { FolderCache } from "./folder-repo/folder-repo";
-import { ArchivePersonalChatCommand } from "../../../application/services/personal-chat-service/archive-personal-chat";
+import { v4 } from "uuid";
 
+export interface CreateFolderRequestBody {
+  name: string;
+}
 @Controller("folders")
 export class FolderController {
-  constructor(private commandBus: CommandBusService) {}
-
-  @Get()
-  async getAllFolders() {
-    return FolderCache;
-  }
+  constructor(private commandBus: CommandBus) {}
 
   @Post("new")
-  async createFolder(@Body() reqBody: FolderRequest.CreateFolderBody) {
-    const userId = "1";
-    const { name } = reqBody;
+  async createFolder(@Body() body: CreateFolderRequestBody) {
+    const { name } = body;
 
-    const command = new CreateFolderCommand(userId, name);
+    const command = new CreateFolderCommand(v4(), name);
 
-    const newFolder = await this.commandBus.executeCommand(command);
-
-    console.log("New folder", newFolder);
+    await this.commandBus.executeCommand(command);
   }
 }

@@ -1,56 +1,46 @@
-import { Id, ValueObject, valueObject } from "ddd-node";
-import { Tag } from "../tag";
+import { Entity, entity } from "ddd-node";
+import { ICriterion, CriterionType } from "./criterion";
 import { PersonalChat } from "../personal-chat/personal-chat";
 
-export abstract class Selection<
-  Props extends object
-> extends ValueObject<Props> {
-  abstract isPersonalChatSelected(personalChat: PersonalChat): boolean;
+export interface SelectionProps {
+  criteria: Map<CriterionType, ICriterion>;
 }
 
-export interface IdSelectionProps {
-  ids: Id[];
-}
+@entity()
+export class Selection extends Entity<SelectionProps> {
+  static newSelection(criteria: ICriterion[] = []) {
+    const selection = Selection.newEntity({ criteria: new Map() });
 
-@valueObject()
-export class IdSelection extends Selection<IdSelectionProps> {
-  get ids() {
-    return this._props.ids;
+    criteria.forEach((criterion) => {
+      selection.setCriterion(criterion);
+    });
+
+    return selection;
   }
 
-  isPersonalChatSelected(personalChat: PersonalChat): boolean {
-    return this.ids.some((id) => personalChat.hasId(id));
-  }
-}
-
-export interface TagSelectionProps {
-  tags: Tag[];
-}
-
-@valueObject()
-export class TagSelection extends Selection<TagSelectionProps> {
-  get tags() {
-    return this._props.tags;
+  getCriteria() {
+    return this._props.criteria;
   }
 
-  isPersonalChatSelected(personalChat: PersonalChat): boolean {
-    return this.tags.some((tag) => personalChat.isTaggedWith(tag));
-  }
-}
-
-export interface ArchivedSelectionProps {
-  isArchived: boolean;
-}
-
-@valueObject()
-export class ArchivedSelection extends Selection<ArchivedSelectionProps> {
-  get isArchived() {
-    return this._props.isArchived;
+  getCriterion(criterionType: CriterionType) {
+    return this.getCriteria().get(criterionType);
   }
 
-  isPersonalChatSelected(personalChat: PersonalChat): boolean {
-    return this.isArchived === personalChat.isArchived();
+  setCriterion(criterion: ICriterion) {
+    this._props.criteria.set(criterion.getCriterionType(), criterion);
+  }
+
+  removeCriterion(criterionType: CriterionType) {
+    this._props.criteria.delete(criterionType);
+  }
+
+  matchesAnyCriteria(personalChat: PersonalChat) {
+    let matches = false;
+
+    this.getCriteria().forEach((criterion) => {
+      if (criterion.match(personalChat)) matches = true;
+    });
+
+    return matches;
   }
 }
-
-export type AnySelection = Selection<any>;

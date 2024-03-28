@@ -43,7 +43,11 @@ export class PersonalChat extends Aggregate<PersonalChatProps> {
       tags: tags || [],
     });
 
-    personalChat.recordEvent(PersonalChatCreated, {});
+    personalChat.recordEvent(PersonalChatCreated, {
+      personalChatId: personalChat.getId().value,
+      sourceChatId: personalChat.getSourceChatId().value,
+      ownerUserId: personalChat.getOwnerUserId().value,
+    });
 
     return personalChat;
   }
