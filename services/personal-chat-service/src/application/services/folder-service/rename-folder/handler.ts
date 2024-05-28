@@ -1,11 +1,11 @@
 import { Id } from "ddd-node";
 import { IFolderRepo } from "../../../../domain/repositories/folder.repo";
 import { RenameFolderCommand } from "./command";
-import { ICommandHandler } from "../../../interfaces";
 import { FolderError } from "../folder-error";
+import { IAppCommandHandler } from "../../../base/app-command.base";
 
 export class RenameFolderHandler
-  implements ICommandHandler<RenameFolderCommand>
+  implements IAppCommandHandler<RenameFolderCommand>
 {
   constructor(private readonly folderRepo: IFolderRepo) {}
 
@@ -13,16 +13,16 @@ export class RenameFolderHandler
     return RenameFolderCommand;
   }
 
-  async handleCommand(command: RenameFolderCommand): Promise<any> {
-    const { name } = command;
-    const folderId = new Id(command.folderId);
+  async handleCommand(command: RenameFolderCommand) {
+    const { payload } = command;
+    const folderId = new Id(payload.folderId);
 
     const folder = await this.folderRepo.findById(folderId);
 
     if (!folder) throw new FolderError.FolderNotFound(folderId);
 
-    folder.rename(name);
+    folder.rename(payload.name);
 
-    this.folderRepo.save(folder);
+    return this.folderRepo.save(folder);
   }
 }

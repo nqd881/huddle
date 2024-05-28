@@ -1,12 +1,12 @@
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
-import { ICommandHandler } from "../../../interfaces";
+import { IAppCommandHandler } from "../../../base/app-command.base";
 import { Type } from "../../../interfaces/type";
 import { SetNotificationsCommand } from "./command";
 
 export class SetNotificationsHandler
-  implements ICommandHandler<SetNotificationsCommand>
+  implements IAppCommandHandler<SetNotificationsCommand>
 {
-  constructor(private personalChat: IPersonalChatRepo) {}
+  constructor(private personalChatRepo: IPersonalChatRepo) {}
 
   commandType(): Type<SetNotificationsCommand> {
     return SetNotificationsCommand;

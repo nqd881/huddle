@@ -44,7 +44,7 @@ export class EventBus<EventBase extends IEvent = IEvent>
   }
 
   async publishEvent<T extends EventBase>(event: T) {
-    const eventType: Type<T> = Object.getPrototypeOf(event).constructor;
+    const eventType = event.constructor as Type<T>;
 
     const handlers = this.getEventHandlers(eventType);
 

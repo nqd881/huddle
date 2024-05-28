@@ -1,5 +1,6 @@
 import {
   Id,
+  Prop,
   SnowflakeIdService,
   StateAggregateBase,
   UseIdService,
@@ -40,21 +41,17 @@ export class Folder extends StateAggregateBase<FolderProps> {
     return newFolder;
   }
 
-  getOwnerUserId() {
-    return this._props.ownerUserId;
-  }
+  @Prop()
+  declare ownerUserId: Id;
 
-  getName() {
-    return this._props.name;
-  }
+  @Prop()
+  declare name: string;
 
-  getFilter() {
-    return this._props.filter;
-  }
+  @Prop()
+  declare filter: FolderFilter;
 
-  getPinnedItems() {
-    return this._props.pinnedItems;
-  }
+  @Prop()
+  declare pinnedItems: PinnedItem[];
 
   getPinnedItem(chatId: Id) {
     return this._props.pinnedItems.find((item) => item.chatId.equals(chatId));

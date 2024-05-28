@@ -1,14 +1,18 @@
+import { Inject } from "@nestjs/common";
 import { LogWhenPersonalChatCreatedOrArchived } from "../../../application/event-handlers/log-when-personal-chat-created-or-archived";
+import { IPersonalChatRepo } from "../../../domain/repositories/personal-chat.repo";
 import { EventHandlerProvider } from "../event-bus/decorator";
 import { IEventHandlerProvider } from "../event-bus/interface";
-import { RepositoryService } from "../repository/repository.service";
+import { PERSONAL_CHAT_REPO } from "./token";
 
 @EventHandlerProvider
 export class PersonalChatEventHandlerProvider implements IEventHandlerProvider {
-  constructor(private repoService: RepositoryService) {}
+  constructor(
+    @Inject(PERSONAL_CHAT_REPO) private personalChatRepo: IPersonalChatRepo
+  ) {}
 
   provideEventHandlers() {
-    const { personalChatRepo } = this.repoService;
+    const { personalChatRepo } = this;
 
     return [new LogWhenPersonalChatCreatedOrArchived(personalChatRepo)];
   }

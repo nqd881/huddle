@@ -1,28 +1,16 @@
 import { Module } from "@nestjs/common";
-import { SequelizeModule } from "@nestjs/sequelize";
 import { ClsModule } from "nestjs-cls";
 import { CommandBusModule } from "../command-bus/command-bus.module";
+import { DbModule } from "../db/db.module";
+import { EnvConfigModule } from "../env-config/env-config.module";
 import { EventBusModule } from "../event-bus/event-bus.module";
-import { PersonalChatModule } from "../personal-chat/personal-chat.module";
-import { RepositoryModule } from "../repository/repository.module";
 import { FolderModule } from "../folder/folder.module";
+import { PersonalChatModule } from "../personal-chat/personal-chat.module";
 
 @Module({
   imports: [
-    SequelizeModule.forRoot({
-      dialect: "postgres",
-      host: "localhost",
-      port: 5432,
-      username: "postgres",
-      password: "123123",
-      database: "postgres",
-      autoLoadModels: true,
-      synchronize: true,
-      pool: {
-        max: 5,
-        min: 3,
-      },
-    }),
+    EnvConfigModule,
+    DbModule.forRoot(),
     ClsModule.forRoot({
       middleware: {
         mount: true,
@@ -31,7 +19,6 @@ import { FolderModule } from "../folder/folder.module";
     }),
     CommandBusModule.forRoot({ global: true }),
     EventBusModule.forRoot({ global: true }),
-    RepositoryModule,
     PersonalChatModule,
     FolderModule,
   ],

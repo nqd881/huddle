@@ -1,4 +1,3 @@
-import { ModuleMetadata, Type } from "@nestjs/common";
 import { IEvent, IEventHandler } from "../../../application/interfaces";
 
 export interface IEventBus<EventBase extends IEvent = IEvent> {

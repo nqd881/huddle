@@ -1,31 +1,48 @@
 import { Inject, Injectable, Optional, Type } from "@nestjs/common";
-import { ICommand, ICommandHandler } from "../../../application/interfaces";
-import { COMMAND_HANDLERS } from "./token";
 import { ICommandBus } from "./interface";
+import { COMMAND_BUS_HOOKS, COMMAND_HANDLERS } from "./token";
+import {
+  IAppCommandBase,
+  IAppCommandHandler,
+} from "../../../application/base/app-command.base";
+import { CommandBusHookHandlerMap, CommandBusHookManager } from "./hook";
 
 @Injectable()
-export class CommandBus<CommandBase extends ICommand = ICommand>
+export class CommandBus<CommandBase extends IAppCommandBase = IAppCommandBase>
   implements ICommandBus<CommandBase>
 {
-  private _handlersMap: Map<Type<CommandBase>, ICommandHandler<CommandBase>> =
-    new Map();
+  private _handlersMap: Map<
+    Type<CommandBase>,
+    IAppCommandHandler<CommandBase>
+  > = new Map();
+
+  private _hookManager: CommandBusHookManager = new CommandBusHookManager();
 
   constructor(
     @Optional()
     @Inject(COMMAND_HANDLERS)
-    commandHandlers: ICommandHandler<CommandBase>[] = []
+    handlers: IAppCommandHandler<CommandBase>[] = [],
+    @Optional()
+    @Inject(COMMAND_BUS_HOOKS)
+    hookHandlerMap: CommandBusHookHandlerMap = {}
   ) {
-    this.registerHandlers(commandHandlers);
+    this.registerHandlers(handlers);
+
+    this._hookManager.addHookHandlers(hookHandlerMap);
   }
 
-  registerHandlers<T extends CommandBase>(handlers: ICommandHandler<T>[]) {
+  registerHandlers<T extends CommandBase>(handlers: IAppCommandHandler<T>[]) {
     handlers.forEach((handler) => {
       this.registerHandler(handler);
     });
   }
 
-  registerHandler<T extends CommandBase>(handler: ICommandHandler<T>) {
+  registerHandler<T extends CommandBase>(handler: IAppCommandHandler<T>) {
+    this._hookManager.runSync("beforeRegisterHandler", handler);
+
     this._handlersMap.set(handler.commandType(), handler);
+
+    this._hookManager.runSync("afterRegisterHandler", handler);
   }
 
   protected getCommandHandler<T extends CommandBase>(commandType: Type<T>) {
@@ -33,14 +50,18 @@ export class CommandBus<CommandBase extends ICommand = ICommand>
 
     if (!handler) throw new Error("Handler not found");
 
-    return handler as ICommandHandler<T>;
+    return handler as IAppCommandHandler<T>;
   }
 
-  executeCommand<T extends CommandBase>(command: T) {
-    const commandType: Type<T> = Object.getPrototypeOf(command).constructor;
+  async executeCommand<T extends CommandBase>(command: T) {
+    await this._hookManager.runAsync("beforeExecute", command);
+
+    const commandType = command.constructor as Type<T>;
 
     const handler = this.getCommandHandler(commandType);
 
-    return handler.handleCommand(command);
+    await handler.handleCommand(command);
+
+    await this._hookManager.runAsync("afterExecute", command);
   }
 }

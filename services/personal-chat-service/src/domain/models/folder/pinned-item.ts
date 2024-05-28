@@ -8,11 +8,11 @@ export interface PinnedItemProps {
 
 export class PinnedItem extends ValueObjectBase<PinnedItemProps> {
   @Prop()
-  folderId: Id;
+  declare folderId: Id;
 
   @Prop()
-  chatId: Id;
+  declare chatId: Id;
 
   @Prop()
-  pinnedDate: Date;
+  declare pinnedDate: Date;
 }

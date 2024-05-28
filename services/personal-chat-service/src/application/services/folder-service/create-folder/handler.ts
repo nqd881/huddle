@@ -1,26 +1,29 @@
 import { Id } from "ddd-node";
 import { Folder } from "../../../../domain/models/folder/folder";
 import { IFolderRepo } from "../../../../domain/repositories/folder.repo";
-import { CreateFolderCommand } from "./command";
-import { ICommandHandler } from "../../../interfaces";
+import { IAppCommandHandler } from "../../../base/app-command.base";
 import { Type } from "../../../interfaces/type";
-import { v4 } from "uuid";
+import { CreateFolderCommand } from "./command";
 
 export class CreateFolderHandler
-  implements ICommandHandler<CreateFolderCommand>
+  implements IAppCommandHandler<CreateFolderCommand>
 {
-  constructor(private readonly folderRepo: IFolderRepo, private id = v4()) {}
+  constructor(private readonly folderRepo: IFolderRepo) {}
 
   commandType(): Type<CreateFolderCommand> {
     return CreateFolderCommand;
   }
 
-  async handleCommand(command: CreateFolderCommand): Promise<any> {
+  async handleCommand(command: CreateFolderCommand) {
+    const { payload } = command;
+
+    if (!command.userId) throw new Error("Lack of user id");
+
     const newFolder = Folder.create({
       ownerUserId: new Id(command.userId),
-      name: command.name,
+      name: payload.name,
     });
 
-    this.folderRepo.save(newFolder);
+    await this.folderRepo.save(newFolder);
   }
 }

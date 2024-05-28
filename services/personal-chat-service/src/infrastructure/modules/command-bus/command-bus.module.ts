@@ -1,6 +1,5 @@
 import { DiscoveryModule, DiscoveryService } from "@golevelup/nestjs-discovery";
 import { DynamicModule, Module, OnModuleInit, Provider } from "@nestjs/common";
-import { ICommandHandler } from "../../../application/interfaces";
 import { CommandBus } from "./command-bus";
 import { CommandHandlerProviderMetaKey } from "./decorator";
 import { ICommandHandlerProvider } from "./interface";
@@ -9,7 +8,11 @@ import {
   CommandBusModuleOptions,
   CommandBusOptionsFactory,
 } from "./options";
-import { COMMAND_BUS_OPTIONS, COMMAND_HANDLERS } from "./token";
+import {
+  COMMAND_BUS_HOOKS,
+  COMMAND_BUS_OPTIONS,
+  COMMAND_HANDLERS,
+} from "./token";
 import _ from "lodash";
 
 @Module({
@@ -38,30 +41,14 @@ export class CommandBusModule implements OnModuleInit {
     });
   }
 
-  static forRoot(handlers?: ICommandHandler[], global?: boolean): DynamicModule;
-  static forRoot(options?: CommandBusModuleOptions): DynamicModule;
-  static forRoot(
-    p1?: ICommandHandler[] | CommandBusModuleOptions,
-    p2?: boolean
-  ): DynamicModule {
-    const handlers: ICommandHandler[] = p1
-      ? Array.isArray(p1)
-        ? p1
-        : p1.handlers ?? []
-      : [];
-
-    const global = p1
-      ? !Array.isArray(p1)
-        ? p1.global
-        : p2
-        ? p2
-        : false
-      : false;
-
+  static forRoot(options?: CommandBusModuleOptions): DynamicModule {
     return {
       module: CommandBusModule,
-      providers: [{ provide: COMMAND_HANDLERS, useValue: handlers }],
-      global,
+      providers: [
+        { provide: COMMAND_HANDLERS, useValue: options?.handlers },
+        { provide: COMMAND_BUS_HOOKS, useValue: options?.hooks },
+      ],
+      global: options?.global,
     };
   }
 
@@ -82,7 +69,15 @@ export class CommandBusModule implements OnModuleInit {
     const commandHandlersProvider: Provider = {
       provide: COMMAND_HANDLERS,
       useFactory: (options: CommandBusModuleOptions) => {
-        return options.handlers;
+        return options?.handlers;
+      },
+      inject: [COMMAND_BUS_OPTIONS],
+    };
+
+    const commandBusHookProvider: Provider = {
+      provide: COMMAND_BUS_HOOKS,
+      useFactory: (options: CommandBusModuleOptions) => {
+        return options?.hooks;
       },
       inject: [COMMAND_BUS_OPTIONS],
     };
@@ -90,6 +85,7 @@ export class CommandBusModule implements OnModuleInit {
     if (options.useFactory) {
       return [
         commandHandlersProvider,
+        commandBusHookProvider,
         {
           provide: COMMAND_BUS_OPTIONS,
           useFactory: options.useFactory,
@@ -101,6 +97,7 @@ export class CommandBusModule implements OnModuleInit {
     if (options.useClass) {
       return [
         commandHandlersProvider,
+        commandBusHookProvider,
         {
           provide: COMMAND_BUS_OPTIONS,
           useFactory: (optionsFactory: CommandBusOptionsFactory) =>

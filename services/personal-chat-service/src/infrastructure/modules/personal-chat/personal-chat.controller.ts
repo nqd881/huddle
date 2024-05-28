@@ -13,25 +13,25 @@ export interface PersonalChatParamsOfUser {
 export class PersonalChatController {
   constructor(private commandBus: CommandBus) {}
 
-  @Post()
-  async create(@Body() body: { userId: string }) {
-    const { userId } = body;
+  // @Post()
+  // async create(@Body() body: { userId: string }) {
+  //   const { userId } = body;
 
-    const sourceChatId = v4();
+  //   const sourceChatId = v4();
 
-    const command = new CreatePersonalChatCommand(
-      sourceChatId,
-      userId,
-      ChatType.Private
-    );
+  //   const command = new CreatePersonalChatCommand(
+  //     sourceChatId,
+  //     userId,
+  //     ChatType.Private
+  //   );
 
-    await this.commandBus.executeCommand(command);
-  }
+  //   await this.commandBus.executeCommand(command);
+  // }
 
-  @Post(":personal_chat_id/archive")
-  archive(@Param("personal_chat_id") personalChatId: string) {
-    const command = new ArchivePersonalChatCommand(personalChatId);
+  // @Post(":personal_chat_id/archive")
+  // archive(@Param("personal_chat_id") personalChatId: string) {
+  //   const command = new ArchivePersonalChatCommand(personalChatId);
 
-    this.commandBus.executeCommand(command);
-  }
+  //   this.commandBus.executeCommand(command);
+  // }
 }

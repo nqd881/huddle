@@ -1,4 +1,4 @@
-import { IMapper } from "../_interfaces/mapper";
+import { IMapper } from "../../interface/mapper";
 
 export class DomainUnitIsNotLoadedError extends Error {
   constructor() {
@@ -16,11 +16,11 @@ export class DomainUnit<T = any, U = any> {
     this.mapper = mapper;
   }
 
-  isLoaded() {
-    return this._id && this._domainModel;
+  isLoaded(): this is LoadedDomainUnit<T, U> {
+    return Boolean(this._id && this._domainModel);
   }
 
-  protected checkIsLoaded() {
+  checkIsLoaded() {
     if (!this.isLoaded()) throw new DomainUnitIsNotLoadedError();
   }
 
@@ -47,30 +47,18 @@ export class DomainUnit<T = any, U = any> {
   }
 
   getId() {
-    this.checkIsLoaded();
-
-    return this._id;
+    return this._id ?? null;
   }
 
   getDomainModel() {
-    this.checkIsLoaded();
-
-    return this._domainModel;
+    return this._domainModel ?? null;
   }
 
   getPersistenceModel() {
     return this._persistenceModel ?? null;
   }
 
-  // update persistence model
-  // updateFn is function that transform oldPersistenceModel to equal to newPersistenceModel
-  //
-  updatePersistenceModel(
-    updateFn: (
-      oldPersistenceModel: U,
-      newPersistenceModel?: U
-    ) => any = () => {}
-  ) {
+  updatePersistenceModel(updateFn: UpdatePersistenceModel = () => {}) {
     this.checkIsLoaded();
 
     const newPersistenceModel = this.mapper.toPersistence(this._domainModel);
@@ -84,3 +72,14 @@ export class DomainUnit<T = any, U = any> {
     }
   }
 }
+
+/* function that transform oldPersistenceModel to equal to newPersistenceMode */
+export type UpdatePersistenceModel<U = any> = (
+  oldPersistenceModel: U,
+  newPersistenceModel?: U
+) => any;
+
+export type LoadedDomainUnit<T = any, U = any> = DomainUnit<T, U> & {
+  getId(): string;
+  getDomainModel(): U;
+};

@@ -1,6 +1,8 @@
-export class PinChatCommand {
-  constructor(
-    public readonly folderId: string,
-    public readonly chatId: string
-  ) {}
+import { AppCommandBase } from "../../../base/app-command.base";
+
+export interface PinChatCommandPayload {
+  folderId: string;
+  chatId: string;
 }
+
+export class PinChatCommand extends AppCommandBase<PinChatCommandPayload> {}

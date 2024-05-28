@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { RepoBaseModule } from "../repo-base/repo-base.module";
+import { RepoBaseModule } from "../../repo-base/repo-base.module";
 import { PersonalChatRepo } from "./personal-chat-repo";
 import { PersonalChatMapper } from "./personal-chat-mapper";
 import { PersonalChatModel } from "./personal-chat-model";

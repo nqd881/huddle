@@ -1,14 +1,14 @@
-import { ChatType } from "../../../../domain/models/personal-chat/chat-type";
+import { AppCommandBase } from "../../../base/app-command.base";
 
-export class SetFolderFilterCommand {
-  constructor(
-    public readonly folderId: string,
-    public readonly includedChatIds?: string[],
-    public readonly includeFriend?: boolean,
-    public readonly includeTypes?: ChatType[],
-    public readonly excludedChatIds?: string[],
-    public readonly excludeMuted?: boolean,
-    public readonly excludeRead?: boolean,
-    public readonly excludeArchived?: boolean
-  ) {}
+export interface SetFolderFilterCommandPayload {
+  folderId: string;
+  includedChatIds?: string[];
+  includeFriend?: boolean;
+  includeTypes?: string[];
+  excludedChatIds?: string[];
+  excludeMuted?: boolean;
+  excludeRead?: boolean;
+  excludeArchived?: boolean;
 }
+
+export class SetFolderFilterCommand extends AppCommandBase<SetFolderFilterCommandPayload> {}

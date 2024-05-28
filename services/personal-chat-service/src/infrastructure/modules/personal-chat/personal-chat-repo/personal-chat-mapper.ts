@@ -3,7 +3,7 @@ import { PersonalChat } from "../../../../domain/models/personal-chat/personal-c
 import { PersonalChatModel } from "./personal-chat-model";
 import { Id } from "ddd-node";
 import { Notifications } from "../../../../domain/models/notifications";
-import { IMapper } from "../_interfaces/mapper";
+import { IMapper } from "../../../interface/mapper";
 import { ChatType } from "../../../../domain/models/personal-chat/chat-type";
 
 @Injectable()

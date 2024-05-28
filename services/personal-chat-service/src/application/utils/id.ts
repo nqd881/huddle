@@ -1,5 +1,10 @@
 import { Id } from "ddd-node";
+import { toArray } from "lodash";
 
-export const toIds = (...ids: string[]) => {
-  return ids.map((id) => new Id(id));
-};
+export function toIds(ids: string[]): Id[];
+export function toIds(...ids: string[]): Id[];
+export function toIds(ids: string | string[], ...otherIds: string[]): Id[] {
+  const values = [...toArray(ids), ...otherIds];
+
+  return values.map((value) => new Id(value));
+}

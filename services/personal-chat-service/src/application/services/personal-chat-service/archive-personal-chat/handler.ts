@@ -2,11 +2,11 @@ import { Id } from "ddd-node";
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
 import { PersonalChatNotFoundError } from "../_errors/personal-chat-not-found";
 import { ArchivePersonalChatCommand } from "./command";
-import { ICommandHandler } from "../../../interfaces";
 import { Type } from "../../../interfaces/type";
+import { IAppCommandHandler } from "../../../base/app-command.base";
 
 export class ArchivePersonalChatHandler
-  implements ICommandHandler<ArchivePersonalChatCommand>
+  implements IAppCommandHandler<ArchivePersonalChatCommand>
 {
   constructor(private personalChatRepo: IPersonalChatRepo) {}
 
@@ -15,7 +15,9 @@ export class ArchivePersonalChatHandler
   }
 
   async handleCommand(command: ArchivePersonalChatCommand): Promise<any> {
-    const personalChatId = new Id(command.personalChatId);
+    const { payload } = command;
+
+    const personalChatId = new Id(payload.personalChatId);
 
     const personalChat = await this.personalChatRepo.findById(personalChatId);
 
@@ -23,6 +25,6 @@ export class ArchivePersonalChatHandler
 
     personalChat.archive();
 
-    this.personalChatRepo.save(personalChat);
+    return this.personalChatRepo.save(personalChat);
   }
 }

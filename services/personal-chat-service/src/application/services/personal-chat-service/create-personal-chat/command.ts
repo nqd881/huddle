@@ -1,9 +1,9 @@
-import { ChatType } from "../../../../domain/models/personal-chat/chat-type";
+import { AppCommandBase } from "../../../base/app-command.base";
 
-export class CreatePersonalChatCommand {
-  constructor(
-    public readonly sourceChatId: string,
-    public readonly ownerUserId: string,
-    public readonly type: ChatType
-  ) {}
+export interface CreatePersonalChatCommandPayload {
+  sourceChatId: string;
+  ownerUserId: string;
+  type: string;
 }
+
+export class CreatePersonalChatCommand extends AppCommandBase<CreatePersonalChatCommandPayload> {}

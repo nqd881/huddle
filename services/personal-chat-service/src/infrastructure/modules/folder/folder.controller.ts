@@ -1,5 +1,4 @@
 import { Body, Controller, Param, Post, Put } from "@nestjs/common";
-import { v4 } from "uuid";
 import { CreateFolderCommand } from "../../../application/services/folder-service/create-folder";
 import { PinChatCommand } from "../../../application/services/folder-service/pin-chat";
 import { RenameFolderCommand } from "../../../application/services/folder-service/rename-folder";
@@ -17,9 +16,7 @@ export class FolderController {
   async createFolder(@Body() body: CreateFolderRequestBody) {
     const { name } = body;
 
-    const userId = v4();
-
-    const command = new CreateFolderCommand(userId, name);
+    const command = new CreateFolderCommand({ name });
 
     await this.commandBus.executeCommand(command);
   }
@@ -31,7 +28,7 @@ export class FolderController {
   ) {
     const { name } = body;
 
-    const command = new RenameFolderCommand(folderId, name);
+    const command = new RenameFolderCommand({ folderId, name });
 
     await this.commandBus.executeCommand(command);
   }
@@ -44,8 +41,8 @@ export class FolderController {
     const { chatId, isPin } = body;
 
     const command = isPin
-      ? new PinChatCommand(folderId, chatId)
-      : new UnpinChatCommand(folderId, chatId);
+      ? new PinChatCommand({ folderId, chatId })
+      : new UnpinChatCommand({ folderId, chatId });
 
     await this.commandBus.executeCommand(command);
   }

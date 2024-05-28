@@ -6,11 +6,11 @@ import {
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
 import { PersonalChatNotFoundError } from "../_errors/personal-chat-not-found";
 import { MarkPersonalChatAsUnreadCommand } from "./command";
-import { ICommandHandler } from "../../../interfaces";
 import { Type } from "../../../interfaces/type";
+import { IAppCommandHandler } from "../../../base/app-command.base";
 
 export class MarkPersonalChatAsUnreadHandler
-  implements ICommandHandler<MarkPersonalChatAsUnreadCommand>
+  implements IAppCommandHandler<MarkPersonalChatAsUnreadCommand>
 {
   constructor(private personalChatRepo: IPersonalChatRepo) {}
 
@@ -19,7 +19,9 @@ export class MarkPersonalChatAsUnreadHandler
   }
 
   async handleCommand(command: MarkPersonalChatAsUnreadCommand): Promise<any> {
-    const personalChatId = new Id(command.personalChatId);
+    const { payload } = command;
+
+    const personalChatId = new Id(payload.personalChatId);
 
     const personalChat = await this.personalChatRepo.findById(personalChatId);
 
@@ -27,6 +29,6 @@ export class MarkPersonalChatAsUnreadHandler
 
     personalChat.mark(ReadingStatusMarker.newMarker(ReadingStatus.UnRead));
 
-    this.personalChatRepo.save(personalChat);
+    return this.personalChatRepo.save(personalChat);
   }
 }

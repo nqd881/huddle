@@ -1,8 +1,10 @@
 import { ModuleMetadata, Type } from "@nestjs/common";
-import { ICommandHandler } from "../../../application/interfaces";
+import { CommandBusHookHandlerMap } from "./hook";
+import { IAppCommandHandler } from "../../../application/base/app-command.base";
 
 export interface CommandBusOptions {
-  handlers?: ICommandHandler[];
+  handlers?: IAppCommandHandler[];
+  hooks?: CommandBusHookHandlerMap;
 }
 
 export interface CommandBusModuleOptions extends CommandBusOptions {

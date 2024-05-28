@@ -1,6 +1,8 @@
-export class UnpinChatCommand {
-  constructor(
-    public readonly folderId: string,
-    public readonly chatId: string
-  ) {}
+import { AppCommandBase } from "../../../base/app-command.base";
+
+export interface UnpinChatCommandPayload {
+  folderId: string;
+  chatId: string;
 }
+
+export class UnpinChatCommand extends AppCommandBase<UnpinChatCommandPayload> {}

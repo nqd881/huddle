@@ -1,7 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { Transaction } from "sequelize";
 import { Model, ModelCtor } from "sequelize-typescript";
-import { IdentifyFn, getIdentifier } from "../_decorators/identifier.decorator";
+import {
+  Matcher,
+  SequelizeModelMatchingService,
+} from "./sequelize-model-matching.service";
 
 export type Update = (transaction?: Transaction) => Promise<any>;
 
@@ -10,10 +13,10 @@ export type Pair<T> = {
   t?: T;
 };
 
-// Sequelize update service
-
 @Injectable()
-export class UpdateService {
+export class SequelizeUpdateService {
+  constructor(private modelMatchingService: SequelizeModelMatchingService) {}
+
   update<T extends Model>(updates: Update[], source: T, target?: T | null) {
     if (target) {
       const modelType = source.constructor as ModelCtor<T>;
@@ -33,12 +36,14 @@ export class UpdateService {
         if (association.isMultiAssociation) {
           const { target: targetType } = association;
 
-          const identifyFn = getIdentifier(targetType as ModelCtor);
+          const matcher = this.modelMatchingService.getMatcher(
+            targetType as ModelCtor
+          );
 
           const arrSource = () => (Array.isArray(s) ? s : []);
           const arrTarget = () => (Array.isArray(t) ? t : []);
 
-          this.updateArray(updates, arrSource(), arrTarget(), identifyFn);
+          this.updateArray(updates, arrSource(), arrTarget(), matcher);
         } else {
           this.updatePair(updates, { s, t });
         }
@@ -68,9 +73,9 @@ export class UpdateService {
     updates: Update[],
     source: T[],
     target: T[],
-    identifyFn: IdentifyFn<T>
+    matcher: Matcher<T>
   ) {
-    const pairs = this.buildPairs(source, target, identifyFn);
+    const pairs = this.buildPairs(source, target, matcher);
 
     pairs.forEach((pair) => this.updatePair(updates, pair));
 
@@ -80,7 +85,7 @@ export class UpdateService {
   buildPairs<T extends Model>(
     source: T[],
     target: T[],
-    identifyFn: IdentifyFn<T>
+    matcher: Matcher<T>
   ): Pair<T>[] {
     const targetTracking = Array(target.length).fill(true);
     const result: Pair<T>[] = [];
@@ -89,7 +94,7 @@ export class UpdateService {
       const tIndex = target.findIndex((_t) => {
         if (!_t) return false;
 
-        return identifyFn(s, _t);
+        return matcher(s, _t);
       });
 
       const t = target[tIndex];

@@ -1,13 +1,18 @@
-import { ICommand, ICommandHandler } from "../../../application/interfaces";
+import {
+  IAppCommandBase,
+  IAppCommandHandler,
+} from "../../../application/base/app-command.base";
 
-export interface ICommandBus<CommandBase extends ICommand = ICommand> {
-  registerHandler<T extends CommandBase>(handler: ICommandHandler<T>): void;
+export interface ICommandBus<
+  CommandBase extends IAppCommandBase = IAppCommandBase
+> {
+  registerHandler<T extends CommandBase>(handler: IAppCommandHandler<T>): void;
 
-  registerHandlers(handlers: ICommandHandler[]): void;
+  registerHandlers(handlers: IAppCommandHandler<CommandBase>[]): void;
 
-  executeCommand<T extends CommandBase>(command: T): Promise<any>;
+  executeCommand<T extends CommandBase>(command: T): Promise<void>;
 }
 
 export interface ICommandHandlerProvider {
-  provideCommandHandlers(): ICommandHandler[];
+  provideCommandHandlers(): IAppCommandHandler[];
 }

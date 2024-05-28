@@ -2,11 +2,12 @@ import { Id } from "ddd-node";
 import { CreatePersonalChatCommand } from ".";
 import { PersonalChat } from "../../../../domain/models/personal-chat/personal-chat";
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
-import { ICommandHandler } from "../../../interfaces";
 import { Type } from "../../../interfaces/type";
+import { IAppCommandHandler } from "../../../base/app-command.base";
+import { ChatType } from "../../../../domain/models/personal-chat/chat-type";
 
 export class CreatePersonalChatHandler
-  implements ICommandHandler<CreatePersonalChatCommand>
+  implements IAppCommandHandler<CreatePersonalChatCommand>
 {
   constructor(private readonly personalChatRepo: IPersonalChatRepo) {}
 
@@ -15,9 +16,11 @@ export class CreatePersonalChatHandler
   }
 
   async handleCommand(command: CreatePersonalChatCommand): Promise<any> {
-    const sourceChatId = new Id(command.sourceChatId);
-    const ownerUserId = new Id(command.ownerUserId);
-    const type = command.type;
+    const { payload } = command;
+
+    const sourceChatId = new Id(payload.sourceChatId);
+    const ownerUserId = new Id(payload.ownerUserId);
+    const type = ChatType.parse(payload.type);
 
     const personalChat = PersonalChat.create({
       sourceChatId,
@@ -26,8 +29,5 @@ export class CreatePersonalChatHandler
     });
 
     return this.personalChatRepo.save(personalChat);
-    // await this.personalChatRepo.save(personalChat);
-
-    // return personalChat;
   }
 }

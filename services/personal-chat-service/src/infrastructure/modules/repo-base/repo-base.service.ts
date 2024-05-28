@@ -2,13 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { Transaction } from "sequelize";
 import { Model, Sequelize } from "sequelize-typescript";
-import { EventBus } from "../../event-bus/event-bus";
-import { EventPublisher } from "../../event-bus/event-publisher";
-import { IMapper } from "../_interfaces/mapper";
-import { DomainUnit } from "./domain-unit";
-import { DomainUnitService } from "./domain-unit.service";
-import { Update, UpdateService } from "./update.service";
+import { EventBus } from "../event-bus/event-bus";
+import { EventPublisher } from "../event-bus/event-publisher";
+import { IMapper } from "../../interface/mapper";
 import { AnyAggregate } from "ddd-node";
+import {
+  SequelizeUpdateService,
+  Update,
+} from "../sequelize-update/sequelize-update.service";
+import { DomainUnitService } from "../domain-unit/domain-unit.service";
+import { DomainUnit } from "../domain-unit/domain-unit";
 
 type DomainModel = AnyAggregate;
 type PersistenceModel = Model;
@@ -19,7 +22,7 @@ export class RepoBaseService {
     private sequelize: Sequelize,
     private clsService: ClsService,
     private eventBus: EventBus,
-    private updateService: UpdateService,
+    private updateService: SequelizeUpdateService,
     private domainUnitService: DomainUnitService
   ) {}
 

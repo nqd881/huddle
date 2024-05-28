@@ -2,7 +2,7 @@ import { InjectModel } from "@nestjs/sequelize";
 import { Id } from "ddd-node";
 import { PersonalChat } from "../../../../domain/models/personal-chat/personal-chat";
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
-import { RepoBaseService } from "../repo-base/repo-base.service";
+import { RepoBaseService } from "../../repo-base/repo-base.service";
 import { PersonalChatMapper } from "./personal-chat-mapper";
 import { PersonalChatModel } from "./personal-chat-model";
 import { Injectable } from "@nestjs/common";
