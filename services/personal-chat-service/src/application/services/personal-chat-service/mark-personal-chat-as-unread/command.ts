@@ -1,7 +1,7 @@
-import { AppCommandBase } from "../../../base/app-command";
+import { AppCommand } from "../../../base/app-command";
 
 export interface MarkPersonalChatAsUnreadCommandPayload {
   personalChatId: string;
 }
 
-export class MarkPersonalChatAsUnreadCommand extends AppCommandBase<MarkPersonalChatAsUnreadCommandPayload> {}
+export class MarkPersonalChatAsUnreadCommand extends AppCommand<MarkPersonalChatAsUnreadCommandPayload> {}

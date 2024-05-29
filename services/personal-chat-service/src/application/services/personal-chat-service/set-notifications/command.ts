@@ -1,3 +1,3 @@
-import { AppCommandBase } from "../../../base/app-command";
+import { AppCommand } from "../../../base/app-command";
 
-export class SetNotificationsCommand extends AppCommandBase<{}> {}
+export class SetNotificationsCommand extends AppCommand<{}> {}

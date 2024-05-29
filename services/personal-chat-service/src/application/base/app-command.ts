@@ -9,25 +9,28 @@ export interface IAppCommandMetadata {
   causationId?: string;
 }
 
-export interface IAppCommandBase<P extends object = {}>
+export interface IAppCommand<P extends object = {}>
   extends IAppCommandMetadata {
   payload: P;
 }
 
-export type AppCommandPayload<T extends IAppCommandBase> =
-  T extends IAppCommandBase<infer P> ? P : never;
+export type PayloadOf<T extends IAppCommand> = T extends IAppCommand<infer P>
+  ? P
+  : never;
 
-export interface IAppCommandHandler<
-  T extends IAppCommandBase = IAppCommandBase
-> {
+export interface IAppCommandHandler<T extends IAppCommand = IAppCommand> {
   commandType(): Type<T>;
 
   handleCommand(command: T): Promise<void>;
 }
 
-export class AppCommandBase<P extends object = {}>
-  implements IAppCommandBase<P>
-{
+export interface IAppCommandBus {
+  registerHandler(handler: IAppCommandHandler): void;
+  registerHandlers(handlers: IAppCommandHandler[]): void;
+  executeCommand(command: IAppCommand): Promise<void>;
+}
+
+export class AppCommand<P extends object = {}> implements IAppCommand<P> {
   public readonly metadata: IAppCommandMetadata;
   public readonly payload: P;
 
@@ -42,8 +45,11 @@ export class AppCommandBase<P extends object = {}>
 
   setMetadata(metadata: Omit<IAppCommandMetadata, "id">) {
     Object.keys(metadata).forEach((metadataKey) => {
-      if (!this.metadata[metadataKey])
+      if (!this.metadata[metadataKey]) {
         this.metadata[metadataKey] = metadata[metadataKey];
+
+        Object.freeze(this.metadata[metadataKey]);
+      }
     });
   }
 

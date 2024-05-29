@@ -1,12 +1,11 @@
 import { ModuleMetadata, Type } from "@nestjs/common";
-import { IEvent, IEventHandler } from "../../../application/interfaces";
+import { IAppEventHandler } from "../../../application/base/app-event";
 
-export interface EventBusOptions<T extends IEvent = IEvent> {
-  handlers?: IEventHandler<T>[];
+export interface EventBusOptions {
+  handlers?: IAppEventHandler[];
 }
 
-export interface EventBusModuleOptions<T extends IEvent = IEvent>
-  extends EventBusOptions<T> {
+export interface EventBusModuleOptions extends EventBusOptions {
   global?: boolean;
 }
 

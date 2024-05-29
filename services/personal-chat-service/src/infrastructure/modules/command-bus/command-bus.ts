@@ -1,15 +1,16 @@
 import { Inject, Injectable, Optional, Type } from "@nestjs/common";
-import { ICommandBus } from "./interface";
+// import { ICommandBus } from "./interface";
 import { COMMAND_BUS_HOOKS, COMMAND_HANDLERS } from "./token";
 import {
-  IAppCommandBase,
+  IAppCommand,
+  IAppCommandBus,
   IAppCommandHandler,
 } from "../../../application/base/app-command";
 import { CommandBusHookHandlerMap, CommandBusHookManager } from "./hook";
 
 @Injectable()
-export class CommandBus<CommandBase extends IAppCommandBase = IAppCommandBase>
-  implements ICommandBus<CommandBase>
+export class CommandBus<CommandBase extends IAppCommand = IAppCommand>
+  implements IAppCommandBus
 {
   private _handlersMap: Map<
     Type<CommandBase>,

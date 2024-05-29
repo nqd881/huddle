@@ -1,32 +1,35 @@
 import { Inject, Injectable, Optional, Type } from "@nestjs/common";
-import { IEvent, IEventHandler } from "../../../application/interfaces";
-import { toArray } from "../../utils/to-array";
-import { IEventBus } from "./interface";
-import { EVENT_HANDLERS } from "./token";
 import _ from "lodash";
+import {
+  IAppEvent,
+  IAppEventBus,
+  IAppEventHandler,
+} from "../../../application/base/app-event";
+import { toArray } from "../../utils/to-array";
+import { EVENT_HANDLERS } from "./token";
 
 @Injectable()
-export class EventBus<EventBase extends IEvent = IEvent>
-  implements IEventBus<EventBase>
+export class EventBus<EventBase extends IAppEvent = IAppEvent>
+  implements IAppEventBus
 {
-  private _handlersMap: Map<Type<EventBase>, IEventHandler<EventBase>[]> =
+  private _handlersMap: Map<Type<EventBase>, IAppEventHandler<EventBase>[]> =
     new Map();
 
   constructor(
     @Optional()
     @Inject(EVENT_HANDLERS)
-    handlers: IEventHandler<EventBase>[] = []
+    handlers: IAppEventHandler<EventBase>[] = []
   ) {
     this.registerHandlers(handlers);
   }
 
-  registerHandlers(handlers: IEventHandler<EventBase>[]) {
+  registerHandlers(handlers: IAppEventHandler<EventBase>[]) {
     handlers.forEach((handler) => {
       this.registerHandler(handler);
     });
   }
 
-  registerHandler<T extends EventBase>(handler: IEventHandler<T>) {
+  registerHandler<T extends EventBase>(handler: IAppEventHandler<T>) {
     const eventTypes = _.uniq(toArray(handler.eventTypes()));
 
     eventTypes.forEach((eventType) => {

@@ -1,4 +1,4 @@
-import { AppCommandBase } from "../../../base/app-command";
+import { AppCommand } from "../../../base/app-command";
 
 export interface CreatePersonalChatCommandPayload {
   sourceChatId: string;
@@ -6,4 +6,4 @@ export interface CreatePersonalChatCommandPayload {
   type: string;
 }
 
-export class CreatePersonalChatCommand extends AppCommandBase<CreatePersonalChatCommandPayload> {}
+export class CreatePersonalChatCommand extends AppCommand<CreatePersonalChatCommandPayload> {}

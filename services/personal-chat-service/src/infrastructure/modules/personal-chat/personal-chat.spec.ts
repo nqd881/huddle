@@ -6,7 +6,7 @@ import { ClsModule, ClsService } from "nestjs-cls";
 import { IMemoryDb, newDb } from "pg-mem";
 import request from "supertest";
 import { v4 } from "uuid";
-import { AppCommandBase } from "../../../application/base/app-command";
+import { AppCommand } from "../../../application/base/app-command";
 import { PersonalChatCreated } from "../../../domain/models/personal-chat/events/personal-chat-created";
 import { CommandBusModule } from "../command-bus/command-bus.module";
 import { EventBusModule } from "../event-bus/event-bus.module";
@@ -38,7 +38,7 @@ describe("Folder Test", function () {
           useFactory: (clsService: ClsService<MyClsStore>) => {
             return {
               hooks: {
-                beforeExecute: (command: AppCommandBase) => {
+                beforeExecute: (command: AppCommand) => {
                   command.setMetadata({ userId: clsService.get("userId") });
                 },
               },

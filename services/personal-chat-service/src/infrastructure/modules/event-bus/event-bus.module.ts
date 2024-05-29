@@ -1,6 +1,5 @@
 import { DiscoveryModule, DiscoveryService } from "@golevelup/nestjs-discovery";
 import { DynamicModule, Module, OnModuleInit, Provider } from "@nestjs/common";
-import { IEventHandler } from "../../../application/interfaces";
 import { EventHandlerProviderMetaKey } from "./decorator";
 import { EventBus } from "./event-bus";
 import { IEventHandlerProvider } from "./interface";

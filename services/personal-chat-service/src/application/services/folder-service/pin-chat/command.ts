@@ -1,8 +1,8 @@
-import { AppCommandBase } from "../../../base/app-command";
+import { AppCommand } from "../../../base/app-command";
 
 export interface PinChatCommandPayload {
   folderId: string;
   chatId: string;
 }
 
-export class PinChatCommand extends AppCommandBase<PinChatCommandPayload> {}
+export class PinChatCommand extends AppCommand<PinChatCommandPayload> {}

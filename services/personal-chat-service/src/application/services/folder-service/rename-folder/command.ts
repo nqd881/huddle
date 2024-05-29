@@ -2,11 +2,11 @@
 //   constructor(public readonly folderId: string, public readonly name: string) {}
 // }
 
-import { AppCommandBase } from "../../../base/app-command";
+import { AppCommand } from "../../../base/app-command";
 
 export interface RenameFolderCommandPayload {
   folderId: string;
   name: string;
 }
 
-export class RenameFolderCommand extends AppCommandBase<RenameFolderCommandPayload> {}
+export class RenameFolderCommand extends AppCommand<RenameFolderCommandPayload> {}

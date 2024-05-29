@@ -1,11 +1,10 @@
-import { Id } from "ddd-node";
 import { PersonalChatArchived } from "../../domain/models/personal-chat/events";
 import { PersonalChatCreated } from "../../domain/models/personal-chat/events/personal-chat-created";
 import { IPersonalChatRepo } from "../../domain/repositories/personal-chat.repo";
-import { IEventHandler } from "../interfaces";
+import { IAppEventHandler } from "../base/app-event";
 
 export class LogWhenPersonalChatCreatedOrArchived
-  implements IEventHandler<PersonalChatCreated | PersonalChatArchived>
+  implements IAppEventHandler<PersonalChatCreated | PersonalChatArchived>
 {
   constructor(private personalChatRepo: IPersonalChatRepo) {}
 

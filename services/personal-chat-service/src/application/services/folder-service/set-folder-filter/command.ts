@@ -1,4 +1,4 @@
-import { AppCommandBase } from "../../../base/app-command";
+import { AppCommand } from "../../../base/app-command";
 
 export interface SetFolderFilterCommandPayload {
   folderId: string;
@@ -11,4 +11,4 @@ export interface SetFolderFilterCommandPayload {
   excludeArchived?: boolean;
 }
 
-export class SetFolderFilterCommand extends AppCommandBase<SetFolderFilterCommandPayload> {}
+export class SetFolderFilterCommand extends AppCommand<SetFolderFilterCommandPayload> {}
