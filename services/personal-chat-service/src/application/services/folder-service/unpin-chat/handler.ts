@@ -1,9 +1,9 @@
 import { Id } from "ddd-node";
 import { IFolderRepo } from "../../../../domain/repositories/folder.repo";
-import { Type } from "../../../interfaces/type";
+import { Type } from "../../../utils/type";
 import { UnpinChatCommand } from ".";
 import { FolderError } from "../folder-error";
-import { IAppCommandHandler } from "../../../base/app-command.base";
+import { IAppCommandHandler } from "../../../base/app-command";
 
 export class UnpinChatHandler implements IAppCommandHandler<UnpinChatCommand> {
   constructor(private folderRepo: IFolderRepo) {}

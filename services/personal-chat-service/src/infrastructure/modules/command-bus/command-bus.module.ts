@@ -2,7 +2,7 @@ import { DiscoveryModule, DiscoveryService } from "@golevelup/nestjs-discovery";
 import { DynamicModule, Module, OnModuleInit, Provider } from "@nestjs/common";
 import { CommandBus } from "./command-bus";
 import { CommandHandlerProviderMetaKey } from "./decorator";
-import { ICommandHandlerProvider } from "./interface";
+import { IAppCommandHandlerProvider } from "./interface";
 import {
   CommandBusModuleAsyncOptions,
   CommandBusModuleOptions,
@@ -35,7 +35,7 @@ export class CommandBusModule implements OnModuleInit {
     commandHandlerProviders.forEach(({ meta, discoveredClass }) => {
       this.commandBus.registerHandlers(
         (
-          discoveredClass.instance as ICommandHandlerProvider
+          discoveredClass.instance as IAppCommandHandlerProvider
         ).provideCommandHandlers()
       );
     });

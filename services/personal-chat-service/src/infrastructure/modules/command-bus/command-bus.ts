@@ -4,7 +4,7 @@ import { COMMAND_BUS_HOOKS, COMMAND_HANDLERS } from "./token";
 import {
   IAppCommandBase,
   IAppCommandHandler,
-} from "../../../application/base/app-command.base";
+} from "../../../application/base/app-command";
 import { CommandBusHookHandlerMap, CommandBusHookManager } from "./hook";
 
 @Injectable()

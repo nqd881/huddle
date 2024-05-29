@@ -13,15 +13,9 @@ export class LogWhenPersonalChatCreatedOrArchived
     return [PersonalChatCreated, PersonalChatArchived];
   }
 
-  async handleEvent(event: PersonalChatCreated) {
-    console.log("Log when a personal chat was created or archived...");
-
-    const eventProps = event.props();
-
-    const personalChatId = new Id(eventProps.personalChatId);
-
-    const personalChat = await this.personalChatRepo.findById(personalChatId);
-
-    console.log(personalChat); // will log null because the transaction has not been committed
+  async handleEvent(event: PersonalChatCreated | PersonalChatArchived) {
+    console.log(
+      "Sending email when a personal chat was created or archived..."
+    );
   }
 }

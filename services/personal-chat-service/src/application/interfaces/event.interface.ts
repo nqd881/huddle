@@ -1,4 +1,4 @@
-import { Type } from "./type";
+import { Type } from "../utils/type";
 
 export interface IEvent {}
 

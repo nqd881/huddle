@@ -2,7 +2,7 @@ import { Id } from "ddd-node";
 import { IFolderRepo } from "../../../../domain/repositories/folder.repo";
 import { RenameFolderCommand } from "./command";
 import { FolderError } from "../folder-error";
-import { IAppCommandHandler } from "../../../base/app-command.base";
+import { IAppCommandHandler } from "../../../base/app-command";
 
 export class RenameFolderHandler
   implements IAppCommandHandler<RenameFolderCommand>

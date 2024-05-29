@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { IAppCommandHandler } from "../../../application/base/app-command.base";
+import { IAppCommandHandler } from "../../../application/base/app-command";
 import { ArchivePersonalChatHandler } from "../../../application/services/personal-chat-service/archive-personal-chat";
 import { CreatePersonalChatHandler } from "../../../application/services/personal-chat-service/create-personal-chat";
 import { MarkPersonalChatAsReadHandler } from "../../../application/services/personal-chat-service/mark-personal-chat-as-read";
@@ -7,13 +7,13 @@ import { MarkPersonalChatAsUnreadHandler } from "../../../application/services/p
 import { SetNotificationsHandler } from "../../../application/services/personal-chat-service/set-notifications";
 import { UnarchivePersonalChatHandler } from "../../../application/services/personal-chat-service/unarchive-personal-chat";
 import { IPersonalChatRepo } from "../../../domain/repositories/personal-chat.repo";
-import { CommandHandlerProvider } from "../command-bus/decorator";
-import { ICommandHandlerProvider } from "../command-bus/interface";
+import { AppCommandHandlerProvider } from "../command-bus/decorator";
+import { IAppCommandHandlerProvider } from "../command-bus/interface";
 import { PERSONAL_CHAT_REPO } from "./token";
 
-@CommandHandlerProvider
+@AppCommandHandlerProvider
 export class PersonalChatCommandHandlerProvider
-  implements ICommandHandlerProvider
+  implements IAppCommandHandlerProvider
 {
   constructor(
     @Inject(PERSONAL_CHAT_REPO) private personalChatRepo: IPersonalChatRepo

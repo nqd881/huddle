@@ -37,35 +37,16 @@ export class EventBusModule implements OnModuleInit {
     });
   }
 
-  static forRoot(handlers?: IEventHandler[], global?: boolean): DynamicModule;
-  static forRoot(options?: EventBusModuleOptions): DynamicModule;
-  static forRoot(
-    p1?: IEventHandler[] | EventBusModuleOptions,
-    p2?: boolean
-  ): DynamicModule {
-    const handlers: IEventHandler[] = p1
-      ? Array.isArray(p1)
-        ? p1
-        : p1.handlers ?? []
-      : [];
-
-    const global = p1
-      ? !Array.isArray(p1)
-        ? p1.global
-        : p2
-        ? p2
-        : false
-      : false;
-
+  static forRoot(options?: EventBusModuleOptions): DynamicModule {
     return {
       module: EventBusModule,
       providers: [
         {
           provide: EVENT_HANDLERS,
-          useValue: handlers,
+          useValue: options?.handlers,
         },
       ],
-      global,
+      global: options?.global,
     };
   }
 

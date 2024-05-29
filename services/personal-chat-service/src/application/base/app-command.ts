@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { Type } from "../interfaces/type";
+import { Type } from "../utils/type";
 
 export interface IAppCommandMetadata {
   readonly id: string;

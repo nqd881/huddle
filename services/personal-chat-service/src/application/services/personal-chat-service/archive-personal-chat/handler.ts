@@ -2,8 +2,8 @@ import { Id } from "ddd-node";
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
 import { PersonalChatNotFoundError } from "../_errors/personal-chat-not-found";
 import { ArchivePersonalChatCommand } from "./command";
-import { Type } from "../../../interfaces/type";
-import { IAppCommandHandler } from "../../../base/app-command.base";
+import { Type } from "../../../utils/type";
+import { IAppCommandHandler } from "../../../base/app-command";
 
 export class ArchivePersonalChatHandler
   implements IAppCommandHandler<ArchivePersonalChatCommand>

@@ -21,7 +21,7 @@ export class FolderMapper implements IMapper<Folder, FolderModel> {
             new PinnedItem({
               folderId: Folder.id(folderId),
               chatId: PersonalChat.id(chatId),
-              pinnedDate,
+              pinnedDate: new Date(pinnedDate),
             })
         ),
         filter: new FolderFilter({}),
@@ -43,7 +43,7 @@ export class FolderMapper implements IMapper<Folder, FolderModel> {
         pinnedItems: pinnedItems.map(({ folderId, chatId, pinnedDate }) => ({
           folderId: folderId.value,
           chatId: chatId.value,
-          pinnedDate,
+          pinnedDate: pinnedDate.getTime(),
         })),
       },
       {

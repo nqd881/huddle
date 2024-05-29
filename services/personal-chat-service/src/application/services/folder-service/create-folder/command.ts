@@ -1,5 +1,5 @@
 import { Folder } from "../../../../domain/models/folder/folder";
-import { AppCommandBase } from "../../../base/app-command.base";
+import { AppCommandBase } from "../../../base/app-command";
 
 export type CreateFolderCommandPayload = {
   name: string;

@@ -1,6 +1,6 @@
 import { IPersonalChatRepo } from "../../../../domain/repositories/personal-chat.repo";
-import { IAppCommandHandler } from "../../../base/app-command.base";
-import { Type } from "../../../interfaces/type";
+import { IAppCommandHandler } from "../../../base/app-command";
+import { Type } from "../../../utils/type";
 import { SetNotificationsCommand } from "./command";
 
 export class SetNotificationsHandler

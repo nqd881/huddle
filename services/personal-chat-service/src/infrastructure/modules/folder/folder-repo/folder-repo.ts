@@ -30,4 +30,8 @@ export class FolderRepo implements IFolderRepo {
   save(instance: Folder): Promise<any> {
     return this.repoBaseService.save(instance, this.folderMapper);
   }
+
+  async delete(id: Id) {
+    await this.folderModel.destroy({ where: { id: id.value } });
+  }
 }

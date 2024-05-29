@@ -1,7 +1,7 @@
 import {
   IAppCommandBase,
   IAppCommandHandler,
-} from "../../../application/base/app-command.base";
+} from "../../../application/base/app-command";
 
 export interface ICommandBus<
   CommandBase extends IAppCommandBase = IAppCommandBase
@@ -13,6 +13,6 @@ export interface ICommandBus<
   executeCommand<T extends CommandBase>(command: T): Promise<void>;
 }
 
-export interface ICommandHandlerProvider {
+export interface IAppCommandHandlerProvider {
   provideCommandHandlers(): IAppCommandHandler[];
 }

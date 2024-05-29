@@ -1,8 +1,8 @@
 import { Id } from "ddd-node";
 import { Folder } from "../../../../domain/models/folder/folder";
 import { IFolderRepo } from "../../../../domain/repositories/folder.repo";
-import { IAppCommandHandler } from "../../../base/app-command.base";
-import { Type } from "../../../interfaces/type";
+import { IAppCommandHandler } from "../../../base/app-command";
+import { Type } from "../../../utils/type";
 import { CreateFolderCommand } from "./command";
 
 export class CreateFolderHandler

@@ -32,7 +32,7 @@ export class PersonalChatMapper
       id: domainModel.id().value,
       sourceChatId: sourceChatId.value,
       ownerUserId: ownerUserId.value,
-      type,
+      type: type.value,
       archived,
     });
   }

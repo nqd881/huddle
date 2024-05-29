@@ -3,6 +3,7 @@ import { IEvent, IEventHandler } from "../../../application/interfaces";
 import { toArray } from "../../utils/to-array";
 import { IEventBus } from "./interface";
 import { EVENT_HANDLERS } from "./token";
+import _ from "lodash";
 
 @Injectable()
 export class EventBus<EventBase extends IEvent = IEvent>
@@ -26,7 +27,7 @@ export class EventBus<EventBase extends IEvent = IEvent>
   }
 
   registerHandler<T extends EventBase>(handler: IEventHandler<T>) {
-    const eventTypes = toArray(handler.eventTypes());
+    const eventTypes = _.uniq(toArray(handler.eventTypes()));
 
     eventTypes.forEach((eventType) => {
       const handlers = this._handlersMap.get(eventType) || [];

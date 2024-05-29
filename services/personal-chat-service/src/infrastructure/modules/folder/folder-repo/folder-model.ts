@@ -11,7 +11,7 @@ import {
 export interface PinnedItemModelAttributes {
   folderId: string;
   chatId: string;
-  pinnedDate: Date;
+  pinnedDate: number;
 }
 
 export interface PinnedItemModelCreationAttributes
@@ -33,7 +33,7 @@ export class PinnedItemModel extends Model<
   declare chatId: string;
 
   @Column
-  declare pinnedDate: Date;
+  declare pinnedDate: number;
 }
 
 // Folder
