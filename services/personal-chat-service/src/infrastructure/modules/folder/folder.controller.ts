@@ -1,25 +1,30 @@
-import { Body, Controller, Delete, Param, Post, Put } from "@nestjs/common";
-import { CreateFolderCommand } from "../../../application/services/folder-service/create-folder";
-import { PinChatCommand } from "../../../application/services/folder-service/pin-chat";
-import { RenameFolderCommand } from "../../../application/services/folder-service/rename-folder";
-import { UnpinChatCommand } from "../../../application/services/folder-service/unpin-chat";
-import { CommandBus } from "../command-bus/command-bus";
-import { RemoveFolderCommand } from "../../../application/services/folder-service/remove-folder";
+import {
+  Body,
+  Controller,
+  Delete,
+  Inject,
+  Param,
+  Post,
+  Put,
+} from "@nestjs/common";
+import { FolderAppService } from "../../../application/services/folder-service/folder-service";
+import { FOLDER_APP_SERVICE } from "./token";
 
 export interface CreateFolderRequestBody {
   name: string;
 }
 @Controller("folders")
 export class FolderController {
-  constructor(private commandBus: CommandBus) {}
+  constructor(
+    @Inject(FOLDER_APP_SERVICE)
+    private folderAppService: FolderAppService
+  ) {}
 
   @Post()
   async createFolder(@Body() body: CreateFolderRequestBody) {
     const { name } = body;
 
-    const command = new CreateFolderCommand({ name });
-
-    await this.commandBus.executeCommand(command);
+    await this.folderAppService.createFolder({ name });
   }
 
   @Put(":folder_id/name")
@@ -29,9 +34,7 @@ export class FolderController {
   ) {
     const { name } = body;
 
-    const command = new RenameFolderCommand({ folderId, name });
-
-    await this.commandBus.executeCommand(command);
+    await this.folderAppService.renameFolder({ folderId, name });
   }
 
   @Post(":folder_id/pin")
@@ -41,17 +44,12 @@ export class FolderController {
   ) {
     const { chatId, isPin } = body;
 
-    const command = isPin
-      ? new PinChatCommand({ folderId, chatId })
-      : new UnpinChatCommand({ folderId, chatId });
-
-    await this.commandBus.executeCommand(command);
+    if (isPin) await this.folderAppService.pinChat({ folderId, chatId });
+    else await this.folderAppService.unpinChat({ folderId, chatId });
   }
 
   @Delete(":folder_id")
   async deleteFolder(@Param("folder_id") folderId: string) {
-    const command = new RemoveFolderCommand({ folderId });
-
-    await this.commandBus.executeCommand(command);
+    await this.folderAppService.removeFolder({ folderId });
   }
 }
