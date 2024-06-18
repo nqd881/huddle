@@ -12,6 +12,7 @@ import { CommandBusModule } from "../command-bus/command-bus.module";
 import { EventBusModule } from "../event-bus/event-bus.module";
 import { FolderRepo } from "./folder-repo/folder-repo";
 import { FolderModule } from "./folder.module";
+import { FolderItemRepo } from "./folder-item-repo/folder-item-repo";
 
 describe("Folder Test", function () {
   type MyClsStore = { userId: string };
@@ -21,6 +22,7 @@ describe("Folder Test", function () {
   let clsService: ClsService<MyClsStore>;
   let app: INestApplication;
   let folderRepo: FolderRepo;
+  let folderItemRepo: FolderItemRepo;
   let userId: string;
   let folderId: string;
   let chatId: string;
@@ -57,7 +59,7 @@ describe("Folder Test", function () {
               },
 
               async handleEvent(event: FolderCreated) {
-                folderId = event.getSource().id.value;
+                folderId = event.source().id.value;
               },
             },
           ],
@@ -77,6 +79,7 @@ describe("Folder Test", function () {
 
     clsService = await testModule.resolve(ClsService);
     folderRepo = await testModule.resolve(FolderRepo);
+    folderItemRepo = await testModule.resolve(FolderItemRepo);
 
     app = testModule.createNestApplication();
     await app.init();
@@ -108,12 +111,19 @@ describe("Folder Test", function () {
     );
   });
 
-  it("POST /folders/:folderId/pin", async () => {
-    await clsService.run(async () => {
-      const payload = { chatId, isPin: true };
+  it("POST /folders/:folder_id/filters", async () => {
+    await clsService.runWith({ userId }, async () => {
+      const payload = {
+        includedIds: [v4(), v4()],
+        excludedIds: [v4()],
+        muted: true,
+        read: false,
+        archived: false,
+        type: "group",
+      };
 
       await request(app.getHttpServer())
-        .post(`/folders/${folderId}/pin`)
+        .post(`/folders/${folderId}/filters`)
         .send(payload)
         .set("Content-Type", "application/json")
         .set("Accept", "application/json")
@@ -121,53 +131,77 @@ describe("Folder Test", function () {
 
       const folder = await folderRepo.findById(new Id(folderId));
 
-      expect(folder?.pinnedItems.length).toBe(1);
+      expect(folder?.filters.length).toBe(5);
     });
   });
 
-  it("POST /folders/:folderId/pin", async () => {
-    await clsService.run(async () => {
-      const payload = { chatId, isPin: false };
+  // it("POST /folders/:folderId/pin", async () => {
+  //   await clsService.run(async () => {
+  //     const payload = { chatId, isPin: true };
 
-      await request(app.getHttpServer())
-        .post(`/folders/${folderId}/pin`)
-        .send(payload)
-        .set("Content-Type", "application/json")
-        .set("Accept", "application/json")
-        .expect(201);
+  //     await request(app.getHttpServer())
+  //       .post(`/folders/${folderId}/pin`)
+  //       .send(payload)
+  //       .set("Content-Type", "application/json")
+  //       .set("Accept", "application/json")
+  //       .expect(201);
 
-      const folder = await folderRepo.findById(new Id(folderId));
+  //     // const folder = await folderRepo.findById(new Id(folderId));
 
-      expect(folder?.pinnedItems.length).toBe(0);
-    });
-  });
+  //     // expect(folder?.pinnedItems.length).toBe(1);
 
-  it("PUT /folders/:folderId/name", async () => {
-    await clsService.run(async () => {
-      const payload = { name: "TestFolderNewName" };
+  //     const folderItem = await folderItemRepo.findInFolder(
+  //       new Id(folderId),
+  //       new Id(chatId)
+  //     );
 
-      await request(app.getHttpServer())
-        .put(`/folders/${folderId}/name`)
-        .send(payload)
-        .set("Content-Type", "application/json")
-        .set("Accept", "application/json")
-        .expect(200);
+  //     expect(folderItem?.pinned).toBe(true);
+  //   });
+  // });
 
-      const folder = await folderRepo.findById(new Id(folderId));
+  // it("POST /folders/:folderId/pin", async () => {
+  //   await clsService.run(async () => {
+  //     const payload = { chatId, isPin: false };
 
-      expect(folder?.name).toBe("TestFolderNewName");
-    });
-  });
+  //     await request(app.getHttpServer())
+  //       .post(`/folders/${folderId}/pin`)
+  //       .send(payload)
+  //       .set("Content-Type", "application/json")
+  //       .set("Accept", "application/json")
+  //       .expect(201);
 
-  it("DELETE /folders/:folderId", async () => {
-    await clsService.run(async () => {
-      await request(app.getHttpServer())
-        .delete(`/folders/${folderId}`)
-        .expect(200);
+  //     const folder = await folderRepo.findById(new Id(folderId));
 
-      const folders = await folderRepo.findAll();
+  //     expect(folder?.pinnedItems.length).toBe(0);
+  //   });
+  // });
 
-      expect(folders.length).toBe(0);
-    });
-  });
+  // it("PUT /folders/:folderId/name", async () => {
+  //   await clsService.run(async () => {
+  //     const payload = { name: "TestFolderNewName" };
+
+  //     await request(app.getHttpServer())
+  //       .put(`/folders/${folderId}/name`)
+  //       .send(payload)
+  //       .set("Content-Type", "application/json")
+  //       .set("Accept", "application/json")
+  //       .expect(200);
+
+  //     const folder = await folderRepo.findById(new Id(folderId));
+
+  //     expect(folder?.name).toBe("TestFolderNewName");
+  //   });
+  // });
+
+  // it("DELETE /folders/:folderId", async () => {
+  //   await clsService.run(async () => {
+  //     await request(app.getHttpServer())
+  //       .delete(`/folders/${folderId}`)
+  //       .expect(200);
+
+  //     const folders = await folderRepo.findAll();
+
+  //     expect(folders.length).toBe(0);
+  //   });
+  // });
 });

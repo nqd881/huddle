@@ -58,7 +58,7 @@ export class DomainUnit<T = any, U = any> {
     return this._persistenceModel ?? null;
   }
 
-  updatePersistenceModel(updateFn: UpdatePersistenceModel = () => {}) {
+  updatePersistenceModel(updateFn: PersistenceModelUpdater = () => {}) {
     this.checkIsLoaded();
 
     const newPersistenceModel = this.mapper.toPersistence(this._domainModel);
@@ -74,7 +74,7 @@ export class DomainUnit<T = any, U = any> {
 }
 
 /* function that transform oldPersistenceModel to equal to newPersistenceMode */
-export type UpdatePersistenceModel<U = any> = (
+export type PersistenceModelUpdater<U = any> = (
   oldPersistenceModel: U,
   newPersistenceModel?: U
 ) => any;

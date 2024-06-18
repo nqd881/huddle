@@ -51,22 +51,22 @@ export class PersonalChat extends StateAggregateBase<PersonalChatProps> {
   }
 
   @Prop()
-  sourceChatId: Id;
+  declare sourceChatId: Id;
 
   @Prop()
-  ownerUserId: Id;
+  declare ownerUserId: Id;
 
   @Prop()
-  type: ChatType;
+  declare type: ChatType;
 
   @Prop()
-  notifications: Notifications;
+  declare notifications: Notifications;
 
   @Prop()
-  readingStatusMarker: ReadingStatusMarker;
+  declare readingStatusMarker: ReadingStatusMarker;
 
   @Prop()
-  archived: boolean;
+  declare archived: boolean;
 
   isMarked() {
     return Boolean(this.readingStatusMarker);

@@ -21,7 +21,7 @@ export class DomainUnitService {
     return this.getDomainUnitMap().get(id);
   }
 
-  setDomainUnit(domainUnit: DomainUnit) {
+  setDomainUnit<T extends DomainUnit>(domainUnit: T) {
     domainUnit.checkIsLoaded();
 
     const map = this.getDomainUnitMap();
@@ -29,5 +29,7 @@ export class DomainUnitService {
     map.set(domainUnit.getId(), domainUnit);
 
     this.clsService.set(DomainUnitService.DOMAIN_UNIT_MAP, map);
+
+    return domainUnit;
   }
 }

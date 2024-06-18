@@ -22,8 +22,8 @@ export class ReadingStatusMarker extends ValueObjectBase<ReadingStatusMarkerProp
   }
 
   @Prop()
-  status: ReadingStatus;
+  declare status: ReadingStatus;
 
   @Prop()
-  markedDate: Date;
+  declare markedDate: Date;
 }

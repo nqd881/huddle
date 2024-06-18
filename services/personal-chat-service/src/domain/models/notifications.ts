@@ -9,5 +9,5 @@ export class Notifications extends ValueObjectBase<NotificationsProps> {
   static readonly None: Notifications;
 
   @Prop()
-  muteUntil?: Date;
+  declare muteUntil?: Date;
 }

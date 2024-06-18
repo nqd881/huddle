@@ -1,19 +1,19 @@
 import { Injectable } from "@nestjs/common";
+import { AnyStateAggregate } from "ddd-node";
 import { ClsService } from "nestjs-cls";
 import { Transaction } from "sequelize";
 import { Model, Sequelize } from "sequelize-typescript";
-import { EventBus } from "../event-bus/event-bus";
-import { EventPublisher } from "../event-bus/event-publisher";
 import { IMapper } from "../../interface/mapper";
-import { AnyAggregate } from "ddd-node";
+import { DomainUnit } from "../domain-unit/domain-unit";
+import { DomainUnitService } from "../domain-unit/domain-unit.service";
+import { DomainEventPublisher } from "../event-bus/domain-event-publisher";
+import { EventBus } from "../event-bus/event-bus";
 import {
   SequelizeUpdateService,
   Update,
 } from "../sequelize-update/sequelize-update.service";
-import { DomainUnitService } from "../domain-unit/domain-unit.service";
-import { DomainUnit } from "../domain-unit/domain-unit";
 
-type DomainModel = AnyAggregate;
+type DomainModel = AnyStateAggregate;
 type PersistenceModel = Model;
 
 @Injectable()
@@ -27,16 +27,24 @@ export class RepoBaseService {
   ) {}
 
   eventPublisher() {
-    return new EventPublisher(this.eventBus);
+    return new DomainEventPublisher(this.eventBus);
+  }
+
+  currentTransaction() {
+    return this.clsService.get("TRANSACTION") as Transaction | undefined;
+  }
+
+  setCurrentTransation(transaction: Transaction) {
+    this.clsService.set("TRANSACTION", transaction);
   }
 
   async transaction(callback: (transaction: Transaction) => Promise<any>) {
-    let transaction = this.clsService.get("TRANSACTION") as Transaction | null;
+    let transaction = this.currentTransaction();
 
     if (!transaction) {
       transaction = await this.sequelize.transaction();
 
-      this.clsService.set("TRANSACTION", transaction);
+      this.setCurrentTransation(transaction);
 
       try {
         const result = await callback(transaction);
@@ -103,13 +111,13 @@ export class RepoBaseService {
     mapper: IMapper<T, U>
   ) {
     return this.transaction(async (transaction) => {
-      await this.eventPublisher().publishAll(instance.getEvents());
-
       const id = instance.id().value;
 
       const domainUnit =
         this.domainUnitService.getDomainUnit<T, U>(id) ??
-        new DomainUnit(mapper).loadDomainModel(id, instance);
+        this.domainUnitService.setDomainUnit(
+          new DomainUnit(mapper).loadDomainModel(id, instance)
+        );
 
       const updates: Update[] = [];
 
@@ -124,6 +132,13 @@ export class RepoBaseService {
       );
 
       await Promise.all(updates.map((u) => u(transaction)));
+
+      await instance.publishEvents(this.eventPublisher());
+
+      // this.eventStore.append(instance.events()) (event store use a thing is session, that mean session can access to current transaction)
+      // Then EventStore will save events into db in same transaction -> Debezium is watching changes from outbox table will publish message to message broker (Kafka)
+      // Then have something (??? - maybe call MessageConsumer) will listen kafka topic to receive domain event message
+      // Then it will use an domain event publisher to publish that event (after deserialized) to subscribers
 
       return domainUnit.getPersistenceModel();
     });

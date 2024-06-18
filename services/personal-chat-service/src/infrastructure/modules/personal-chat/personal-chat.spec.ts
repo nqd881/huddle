@@ -55,7 +55,7 @@ describe("Folder Test", function () {
               },
 
               async handleEvent(event: PersonalChatCreated) {
-                chatId = event.getSource().id.value;
+                chatId = event.source().id.value;
               },
             },
           ],

@@ -1,16 +1,30 @@
 import { Module } from "@nestjs/common";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { RepoBaseModule } from "../../repo-base/repo-base.module";
-import { FolderMapper } from "./folder-mapper";
+import { FolderFilterMapper, FolderMapper } from "./folder-mapper";
 import { FolderRepo } from "./folder-repo";
-import { FolderModel, PinnedItemModel } from "./folder-model";
+import {
+  ChatArchivedFilterModel,
+  ChatIdFilterModel,
+  ChatMutedFilterModel,
+  ChatReadFilterModel,
+  ChatTypeFilterModel,
+  FolderModel,
+} from "./models";
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([FolderModel, PinnedItemModel]),
+    SequelizeModule.forFeature([
+      FolderModel,
+      ChatIdFilterModel,
+      ChatTypeFilterModel,
+      ChatMutedFilterModel,
+      ChatReadFilterModel,
+      ChatArchivedFilterModel,
+    ]),
     RepoBaseModule,
   ],
-  providers: [FolderMapper, FolderRepo],
+  providers: [FolderFilterMapper, FolderMapper, FolderRepo],
   exports: [FolderRepo],
 })
 export class FolderRepoModule {}

@@ -1,6 +1,8 @@
 import { Body, Controller, Inject, Param, Post } from "@nestjs/common";
 import { PersonalChatAppService } from "../../../application/services/personal-chat-service/personal-chat-service";
 import { PERSONAL_CHAT_APP_SERVICE } from "./token";
+import { CreatePersonalChatCommand } from "../../../application/services/personal-chat-service/create-personal-chat";
+import { ArchivePersonalChatCommand } from "../../../application/services/personal-chat-service/archive-personal-chat";
 
 export interface PersonalChatParamsOfUser {
   userId: string;
@@ -19,15 +21,19 @@ export class PersonalChatController {
   ) {
     const { sourceChatId, ownerUserId, type } = body;
 
-    await this.personalChatAppService.createPersonalChat({
-      sourceChatId,
-      ownerUserId,
-      type,
-    });
+    await this.personalChatAppService.createPersonalChat(
+      new CreatePersonalChatCommand({
+        sourceChatId,
+        ownerUserId,
+        type,
+      })
+    );
   }
 
   @Post(":personal_chat_id/archive")
   async archive(@Param("personal_chat_id") personalChatId: string) {
-    await this.personalChatAppService.archivePersonalChat({ personalChatId });
+    await this.personalChatAppService.archivePersonalChat(
+      new ArchivePersonalChatCommand({ personalChatId })
+    );
   }
 }

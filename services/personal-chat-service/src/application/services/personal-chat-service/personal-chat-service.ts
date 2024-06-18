@@ -43,12 +43,12 @@ export class PersonalChatAppService extends AppServiceBase {
     ]);
   }
 
-  createPersonalChat = this.buildService(CreatePersonalChatCommand);
-  archivePersonalChat = this.buildService(ArchivePersonalChatCommand);
-  unarchivePersonalChat = this.buildService(UnarchivePersonalChatCommand);
-  markPersonalChatAsRead = this.buildService(MarkPersonalChatAsReadCommand);
-  markPersonalChatAsUnread = this.buildService(MarkPersonalChatAsUnreadCommand);
-  setPersonalChatNotifications = this.buildService(
-    SetPersonalChatNotificationsCommand
-  );
+  createPersonalChat = this.buildService<CreatePersonalChatCommand>();
+  archivePersonalChat = this.buildService<ArchivePersonalChatCommand>();
+  unarchivePersonalChat = this.buildService<UnarchivePersonalChatCommand>();
+  markPersonalChatAsRead = this.buildService<MarkPersonalChatAsReadCommand>();
+  markPersonalChatAsUnread =
+    this.buildService<MarkPersonalChatAsUnreadCommand>();
+  setPersonalChatNotifications =
+    this.buildService<SetPersonalChatNotificationsCommand>();
 }

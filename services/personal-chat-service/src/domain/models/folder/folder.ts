@@ -5,35 +5,38 @@ import {
   StateAggregateBase,
   UseIdService,
 } from "ddd-node";
+import { ChatDescriptor } from "./chat-descriptor";
 import { FolderCreated } from "./events/folder-created";
-import { FolderFilterUpdated } from "./events/folder-filter-updated";
+import { FolderDeleted } from "./events/folder-deleted";
+import { FolderFiltersUpdated } from "./events/folder-filters-updated";
 import { FolderRenamed } from "./events/folder-renamed";
-import { FolderFilter } from "./folder-filter";
-import { PinnedItem } from "./pinned-item";
+import { FolderFilter } from "./folder-filter/folder-filter";
+import { FolderStatus } from "./folder-status";
+import { FolderEligibleChats } from "./folder-eligible-chats";
 
 export interface FolderProps {
   readonly ownerUserId: Id;
   name: string;
-  pinnedItems: PinnedItem[];
-  filter: FolderFilter;
+  filters: FolderFilter[];
+  status: FolderStatus;
 }
 
 export type CreateFolderProps = {
   ownerUserId: Id;
   name: string;
-  filter?: FolderFilter;
+  filters?: FolderFilter[];
 };
 
 @UseIdService(new SnowflakeIdService())
 export class Folder extends StateAggregateBase<FolderProps> {
   static create(props: CreateFolderProps) {
-    const { ownerUserId, name, filter } = props;
+    const { ownerUserId, name, filters } = props;
 
     const newFolder = Folder.newAggregate({
       ownerUserId,
       name,
-      filter: filter ?? new FolderFilter({}),
-      pinnedItems: [],
+      filters: filters ?? [],
+      status: FolderStatus.Active,
     });
 
     newFolder.recordEvent(FolderCreated, { name, ownerUserId });
@@ -48,14 +51,10 @@ export class Folder extends StateAggregateBase<FolderProps> {
   declare name: string;
 
   @Prop()
-  declare filter: FolderFilter;
+  declare filters: FolderFilter[];
 
   @Prop()
-  declare pinnedItems: PinnedItem[];
-
-  getPinnedItem(chatId: Id) {
-    return this._props.pinnedItems.find((item) => item.chatId.equals(chatId));
-  }
+  declare status: FolderStatus;
 
   rename(name: string) {
     this._props.name = name;
@@ -63,31 +62,28 @@ export class Folder extends StateAggregateBase<FolderProps> {
     this.recordEvent(FolderRenamed, { name });
   }
 
-  updateFilter(filter: FolderFilter) {
-    this._props.filter = filter;
+  setFilters(filters: FolderFilter[]) {
+    this._props.filters = filters;
 
-    this.recordEvent(FolderFilterUpdated, {});
+    this.recordEvent(FolderFiltersUpdated, {});
   }
 
-  pinChat(chatId: Id) {
-    const newItem = new PinnedItem({
-      folderId: this.id(),
-      chatId,
-      pinnedDate: new Date(),
-    });
+  delete() {
+    if (this.status.isDeleted()) return;
 
-    this._props.pinnedItems = this._props.pinnedItems
-      .filter((item) => !item.chatId.equals(chatId))
-      .concat(newItem);
+    this._props.status = FolderStatus.Deleted;
+
+    this.recordEvent(FolderDeleted, {});
   }
 
-  unpinChat(chatId: Id) {
-    const isPinned = Boolean(this.getPinnedItem(chatId));
-
-    if (!isPinned) throw new Error();
-
-    this._props.pinnedItems = this._props.pinnedItems.filter(
-      (item) => !item.chatId.equals(chatId)
+  filter(chatDescriptors: ChatDescriptor[]): FolderEligibleChats {
+    const matches = chatDescriptors.filter((chatDescriptor) =>
+      this._props.filters.some((filter) => filter.matchesFilter(chatDescriptor))
     );
+
+    return new FolderEligibleChats({
+      folderId: this.id(),
+      chatIds: matches.map((descriptor) => descriptor.chatId),
+    });
   }
 }
