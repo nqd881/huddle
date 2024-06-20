@@ -34,12 +34,6 @@ export class FolderRepo implements IFolderRepo {
   }
 
   async save(instance: Folder): Promise<any> {
-    // console.log("Persistence model", this.folderMapper.toPersistence(instance));
-
-    // const idFilter = await this.sequelize.query(`SELECT * FROM chat_id_filter`);
-
-    // console.log("ID_FILTER", idFilter);
-
     return this.repoBaseService.save(instance, this.folderMapper);
   }
 

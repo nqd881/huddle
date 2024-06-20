@@ -16,7 +16,7 @@ export interface CommandBusOptionsFactory {
 }
 
 export interface CommandBusModuleAsyncOptions
-  extends Pick<ModuleMetadata, "imports"> {
+  extends Pick<ModuleMetadata, "imports" | "exports"> {
   useClass?: Type<CommandBusOptionsFactory>;
   useFactory?: (
     ...args: any[]

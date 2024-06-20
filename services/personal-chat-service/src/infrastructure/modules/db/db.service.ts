@@ -2,10 +2,16 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Client } from "pg";
 import { EnvName } from "../../env/env.name";
+import { ClsService } from "nestjs-cls";
+import { MyClsStore } from "../app/my-cls-store";
+import { Transaction } from "sequelize";
 
 @Injectable()
 export class DbService {
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private clsService: ClsService<MyClsStore>
+  ) {}
 
   async connect() {
     const client = new Client({
@@ -42,5 +48,13 @@ export class DbService {
     await client.query(`DROP DATABASE IF EXISTS ${dbName}`);
 
     client.end();
+  }
+
+  currentTransaction() {
+    return this.clsService.get("transaction");
+  }
+
+  setCurrentTransaction(transaction: Transaction) {
+    return this.clsService.set("transaction", transaction);
   }
 }

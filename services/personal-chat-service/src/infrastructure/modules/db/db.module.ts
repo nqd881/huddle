@@ -3,11 +3,12 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { SequelizeModule, SequelizeModuleOptions } from "@nestjs/sequelize";
 import { EnvName } from "../../env/env.name";
 import { DbService } from "./db.service";
+import { ClsModule } from "nestjs-cls";
 
 type DbModuleOptions = SequelizeModuleOptions;
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, ClsModule],
   providers: [DbService],
   exports: [DbService],
 })

@@ -59,7 +59,7 @@ describe("Folder Test", function () {
               },
 
               async handleEvent(event: FolderCreated) {
-                folderId = event.source().id.value;
+                folderId = event.source().aggregateId.value;
               },
             },
           ],

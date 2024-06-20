@@ -57,9 +57,10 @@ export class CommandBusModule implements OnModuleInit {
 
     return {
       module: CommandBusModule,
-      imports: [...(options?.imports || [])],
+      imports: options?.imports,
       providers,
-      global: options.global,
+      global: options?.global,
+      exports: options?.exports,
     };
   }
 
@@ -82,14 +83,14 @@ export class CommandBusModule implements OnModuleInit {
       inject: [COMMAND_BUS_OPTIONS],
     };
 
-    if (options.useFactory) {
+    if (options?.useFactory) {
       return [
         commandHandlersProvider,
         commandBusHookProvider,
         {
           provide: COMMAND_BUS_OPTIONS,
           useFactory: options.useFactory,
-          inject: options?.inject || [],
+          inject: options?.inject,
         },
       ];
     }
@@ -107,6 +108,8 @@ export class CommandBusModule implements OnModuleInit {
       ];
     }
 
-    return [];
+    throw new Error(
+      "Cannot create async providers without useClass or useFactory"
+    );
   }
 }

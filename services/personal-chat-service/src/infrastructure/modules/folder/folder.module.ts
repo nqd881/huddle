@@ -1,19 +1,24 @@
 import { Module } from "@nestjs/common";
-import { FolderEventHandlerProvider } from "./event-handler-provider";
-import { FolderController } from "./folder.controller";
-import { FolderRepoModule } from "./folder-repo/folder-repo.module";
-import { FOLDER_APP_SERVICE, FOLDER_ITEM_REPO, FOLDER_REPO } from "./token";
-import { FolderRepo } from "./folder-repo/folder-repo";
+import { IAppCommandBus } from "../../../application/base/app-command";
 import { FolderAppService } from "../../../application/services/folder-service/folder-service";
+import { IFolderItemRepo } from "../../../domain/repositories/folder-item.repo";
 import { IFolderRepo } from "../../../domain/repositories/folder.repo";
 import { CommandBus } from "../command-bus/command-bus";
-import { IAppCommandBus } from "../../../application/base/app-command";
-import { FolderItemRepoModule } from "./folder-item-repo/folder-item-repo.module";
-import { IFolderItemRepo } from "../../../domain/repositories/folder-item.repo";
+import { FolderEventHandlerProvider } from "./event-handler-provider";
+import { FolderEventSerializersModule } from "./folder-event-serializers/folder-event-serializers.module";
 import { FolderItemRepo } from "./folder-item-repo/folder-item-repo";
+import { FolderItemRepoModule } from "./folder-item-repo/folder-item-repo.module";
+import { FolderRepo } from "./folder-repo/folder-repo";
+import { FolderRepoModule } from "./folder-repo/folder-repo.module";
+import { FolderController } from "./folder.controller";
+import { FOLDER_APP_SERVICE, FOLDER_ITEM_REPO, FOLDER_REPO } from "./token";
 
 @Module({
-  imports: [FolderRepoModule, FolderItemRepoModule],
+  imports: [
+    FolderRepoModule,
+    FolderItemRepoModule,
+    FolderEventSerializersModule,
+  ],
   controllers: [FolderController],
   providers: [
     { provide: FOLDER_REPO, useExisting: FolderRepo },
