@@ -1,7 +1,24 @@
-import { providerToken } from "../../utils/provider-token";
+import { createModuleProviderTokenBuilder } from "../../utils/provider-token";
 
-export const EVENT_STORE_SESSION = providerToken("EVENT_STORE_SESSION");
+export const EVENT_STORE_MODULE_NAME = "EventStore";
 
-export const EVENT_SERIALIZER = providerToken("EVENT_SERIALIZER");
+const EventStoreProviderToken = createModuleProviderTokenBuilder(
+  EVENT_STORE_MODULE_NAME
+);
 
-export const EVENT_STORE_OPTIONS = providerToken("EVENT_STORE_OPTIONS");
+export const EVENT_STORE_SESSION = EventStoreProviderToken(
+  "Options",
+  "Session"
+);
+
+export const EVENT_SERIALIZER = EventStoreProviderToken(
+  "Options",
+  "Serializer"
+);
+
+export const EVENT_DESERIALIZER = EventStoreProviderToken(
+  "Options",
+  "Deserializer"
+);
+
+export const EVENT_STORE_OPTIONS = EventStoreProviderToken("Options");

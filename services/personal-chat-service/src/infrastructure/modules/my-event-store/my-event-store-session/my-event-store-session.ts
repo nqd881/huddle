@@ -1,15 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { DbService } from "../../db/db.service";
-import { IEventStoreSession } from "../../event-store/event-store-session";
-import { StoredEvent } from "../../event-store/stored-event";
-import {
-  StoredEventModel,
-  StoredEventModelCreationAttributes,
-} from "./stored-event.model";
+import { IEventStoreSession } from "../../event-store";
+import { StoredEvent } from "../stored-event";
+import { StoredEventModel } from "./stored-event.model";
 
 @Injectable()
-export class MyEventStoreSession implements IEventStoreSession {
+export class MyEventStoreSession implements IEventStoreSession<StoredEvent> {
   constructor(
     private dbService: DbService,
     @InjectModel(StoredEventModel)
@@ -24,19 +21,8 @@ export class MyEventStoreSession implements IEventStoreSession {
   ): Promise<void> {
     const storedEvents = Array.isArray(p1) ? p1 : [p1, ...p2];
 
-    await this.storedEventModel.bulkCreate(this.mapStoredEvents(storedEvents), {
+    await this.storedEventModel.bulkCreate(storedEvents, {
       transaction: this.dbService.currentTransaction(),
-    });
-  }
-
-  private mapStoredEvents(
-    storedEvents: StoredEvent[]
-  ): StoredEventModelCreationAttributes[] {
-    return storedEvents.map((storedEvent) => {
-      return {
-        ...storedEvent,
-        eventOccurredOn: new Date(storedEvent.eventOccurredOn),
-      };
     });
   }
 }

@@ -3,7 +3,7 @@ import { LogWhenPersonalChatCreatedOrArchived } from "../../../application/event
 import { IPersonalChatRepo } from "../../../domain/repositories/personal-chat.repo";
 import { EventHandlerProvider } from "../event-bus/decorator";
 import { IEventHandlerProvider } from "../event-bus/interface";
-import { PERSONAL_CHAT_REPO } from "./token";
+import { PERSONAL_CHAT_REPO } from "../repositories/personal-chat-repo";
 
 @EventHandlerProvider
 export class PersonalChatEventHandlerProvider implements IEventHandlerProvider {

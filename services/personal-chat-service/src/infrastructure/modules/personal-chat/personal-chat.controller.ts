@@ -1,8 +1,8 @@
 import { Body, Controller, Inject, Param, Post } from "@nestjs/common";
-import { PersonalChatAppService } from "../../../application/services/personal-chat-service/personal-chat-service";
+import { PersonalChatAppService } from "../../../application/use-cases/personal-use-cases/personal-chat-service";
 import { PERSONAL_CHAT_APP_SERVICE } from "./token";
-import { CreatePersonalChatCommand } from "../../../application/services/personal-chat-service/create-personal-chat";
-import { ArchivePersonalChatCommand } from "../../../application/services/personal-chat-service/archive-personal-chat";
+import { CreatePersonalChatCommand } from "../../../application/use-cases/personal-use-cases/create-personal-chat";
+import { ArchivePersonalChatCommand } from "../../../application/use-cases/personal-use-cases/archive-personal-chat";
 
 export interface PersonalChatParamsOfUser {
   userId: string;

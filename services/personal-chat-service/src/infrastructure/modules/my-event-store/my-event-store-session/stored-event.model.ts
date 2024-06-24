@@ -7,11 +7,11 @@ import {
 } from "sequelize-typescript";
 
 export interface StoredEventModelAttributes {
-  eventModelName: string;
-  eventModelVersion: number;
+  eventModelId: string;
   eventType: string;
   eventId: string;
   eventOccurredOn: Date;
+  eventSource: string;
   eventPayload: string;
 }
 
@@ -31,16 +31,16 @@ export class StoredEventModel extends Model<
   declare eventId: string;
 
   @Column
-  declare eventModelName: string;
-
-  @Column
-  declare eventModelVersion: number;
+  declare eventModelId: string;
 
   @Column
   declare eventType: string;
 
   @Column(DataType.DATE)
   declare eventOccurredOn: Date;
+
+  @Column
+  declare eventSource: string;
 
   @Column
   declare eventPayload: string;

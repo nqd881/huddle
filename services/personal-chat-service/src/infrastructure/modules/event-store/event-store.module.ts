@@ -5,19 +5,23 @@ import {
   Provider,
   Type,
 } from "@nestjs/common";
-import { EventStore, IEventStore } from "./event-store";
-import { DbModule } from "../db/db.module";
-import { IEventStoreSession } from "./event-store-session";
-import { IEventSerializer } from "./event-serializer";
+import { EventStore } from "./event-store";
 import {
+  EVENT_DESERIALIZER,
   EVENT_SERIALIZER,
   EVENT_STORE_OPTIONS,
   EVENT_STORE_SESSION,
 } from "./token";
+import {
+  IEventDeserializer,
+  IEventSerializer,
+  IEventStoreSession,
+} from "./interfaces";
 
 export interface EventStoreOptions {
   session: IEventStoreSession;
   serializer: IEventSerializer;
+  deserializer: IEventDeserializer;
 }
 
 export interface EventStoreModuleOptions extends EventStoreOptions {
@@ -49,6 +53,7 @@ export class EventStoreModule {
       providers: [
         { provide: EVENT_STORE_SESSION, useValue: options.session },
         { provide: EVENT_SERIALIZER, useValue: options.serializer },
+        { provide: EVENT_DESERIALIZER, useValue: options.deserializer },
       ],
       global: options?.global,
     };
@@ -85,10 +90,19 @@ export class EventStoreModule {
       inject: [EVENT_STORE_OPTIONS],
     };
 
+    const deserializerProvider: Provider = {
+      provide: EVENT_DESERIALIZER,
+      useFactory: (options: EventStoreOptions) => {
+        return options.deserializer;
+      },
+      inject: [EVENT_STORE_OPTIONS],
+    };
+
     if (options?.useClass) {
       return [
         sessionProvider,
         serializerProvider,
+        deserializerProvider,
         {
           provide: EVENT_STORE_OPTIONS,
           useFactory: (optionsBuilder: EventStoreOptionsBuilder) => {
@@ -103,6 +117,7 @@ export class EventStoreModule {
       return [
         sessionProvider,
         serializerProvider,
+        deserializerProvider,
         {
           provide: EVENT_STORE_OPTIONS,
           useFactory: options.useFactory,

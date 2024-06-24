@@ -1,14 +1,12 @@
 import { Type } from "@nestjs/common";
 import { AnyEvent, EventClass } from "ddd-node";
-import { metaKey } from "../../../utils/meta-key";
-import { DomainEventSerializer } from "./domain-event-serializer";
+import { DomainEventSerializerBase } from "./domain-event-serializer.base";
+import { DOMAIN_EVENT_SERIALIZER } from "./domain-event-serializer.meta";
 
-export const DomainEventSerializerMetaKey = metaKey("DomainEventSerializer");
-
-export const InjectableDomainEventSerializer = <T extends AnyEvent>(
+export const DomainEventSerializer = <T extends AnyEvent>(
   eventType: EventClass<T>
 ) => {
-  return (target: Type<DomainEventSerializer<T>>) => {
-    Reflect.defineMetadata(DomainEventSerializerMetaKey, eventType, target);
+  return (target: Type<DomainEventSerializerBase<T>>) => {
+    Reflect.defineMetadata(DOMAIN_EVENT_SERIALIZER, eventType, target);
   };
 };

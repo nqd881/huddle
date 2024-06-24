@@ -6,13 +6,12 @@ import { IMapper } from "../../interface/mapper";
 import { DbService } from "../db/db.service";
 import { DomainUnit } from "../domain-unit/domain-unit";
 import { DomainUnitService } from "../domain-unit/domain-unit.service";
-import { DomainEventPublisher } from "../event-bus/domain-event-publisher";
 import { EventBus } from "../event-bus/event-bus";
+import { EventStore, IEventStore } from "../event-store";
 import {
   SequelizeUpdateService,
   Update,
 } from "../sequelize-update/sequelize-update.service";
-import { EventStore, IEventStore } from "../event-store/event-store";
 
 type DomainModel = AnyStateAggregate;
 type PersistenceModel = Model;
@@ -30,7 +29,7 @@ export class RepoBaseService {
   constructor(
     private sequelize: Sequelize,
     private dbService: DbService,
-    private eventBus: EventBus,
+    // private eventBus: EventBus,
     private updateService: SequelizeUpdateService,
     private domainUnitService: DomainUnitService,
     private eventStore: EventStore

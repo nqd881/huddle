@@ -1,0 +1,73 @@
+services:
+  zookeeper-service:
+    image: debezium/zookeeper
+    networks:
+      - debezium-network
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-v", "localhost", "2181", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  kafka-service:
+    image: debezium/kafka
+    networks:
+      - debezium-network
+    ports:
+      - "9092:9092"
+    environment:
+      ZOOKEEPER_CONNECT: zookeeper-service:2181
+    depends_on:
+      zookeeper-service:
+        condition: service_started
+    # healthcheck:
+    #   test: ["CMD-SHELL", "nc -z localhost 9092 || exit -1"]
+    #   start_period: 15s
+    #   interval: 5s
+    #   timeout: 10s
+    #   retries: 10
+
+  postgres-service:
+    image: debezium/postgres:16-alpine
+    networks:
+      - debezium-network
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - kafka-service
+
+  kafka-connect-service:
+    image: debezium/connect
+    networks:
+      - debezium-network
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka-service:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
+    depends_on:
+      kafka-service:
+        condition: service_started
+        restart: true
+      postgres-service:
+        condition: service_healthy
+        restart: true
+
+networks:
+  debezium-network:

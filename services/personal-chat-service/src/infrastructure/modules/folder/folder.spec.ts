@@ -10,7 +10,7 @@ import { AppCommand } from "../../../application/base/app-command";
 import { FolderCreated } from "../../../domain/models/folder/events/folder-created";
 import { CommandBusModule } from "../command-bus/command-bus.module";
 import { EventBusModule } from "../event-bus/event-bus.module";
-import { FolderRepo } from "./folder-repo/folder-repo";
+import { FolderRepo } from "../repositories/folder-repo/folder-repo";
 import { FolderModule } from "./folder.module";
 import { FolderItemRepo } from "./folder-item-repo/folder-item-repo";
 

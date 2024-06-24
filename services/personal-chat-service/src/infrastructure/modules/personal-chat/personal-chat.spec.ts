@@ -10,7 +10,7 @@ import { AppCommand } from "../../../application/base/app-command";
 import { PersonalChatCreated } from "../../../domain/models/personal-chat/events/personal-chat-created";
 import { CommandBusModule } from "../command-bus/command-bus.module";
 import { EventBusModule } from "../event-bus/event-bus.module";
-import { PersonalChatRepo } from "./personal-chat-repo/personal-chat-repo";
+import { PersonalChatRepo } from "../repositories/personal-chat-repo/personal-chat-repo";
 import { PersonalChatModule } from "./personal-chat.module";
 
 describe("Folder Test", function () {

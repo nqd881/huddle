@@ -1,27 +1,45 @@
-import { AnyEvent } from "ddd-node";
-import { IEventStoreSession } from "./event-store-session";
-import { IEventSerializer } from "./event-serializer";
 import { Inject, Injectable } from "@nestjs/common";
-import { StoredEvent } from "./stored-event";
-import { EVENT_SERIALIZER, EVENT_STORE_SESSION } from "./token";
 
-export interface IEventStore {
-  append(event: AnyEvent): void;
-  store(): Promise<void>;
-}
+import { IStoredEvent } from "./interfaces/stored-event.interface";
+import {
+  EVENT_DESERIALIZER,
+  EVENT_SERIALIZER,
+  EVENT_STORE_SESSION,
+} from "./token";
+import {
+  IEvent,
+  IEventDeserializer,
+  IEventSerializer,
+  IEventStore,
+  IEventStoreSession,
+} from "./interfaces";
 
 @Injectable()
-export class EventStore implements IEventStore {
-  private _storedEvents: StoredEvent[] = [];
+export class EventStore<
+  T extends IEvent = IEvent,
+  U extends IStoredEvent = IStoredEvent
+> implements IEventStore<T, U>
+{
+  private _storedEvents: U[] = [];
 
   constructor(
     @Inject(EVENT_STORE_SESSION)
-    private eventStoreSession: IEventStoreSession,
-    @Inject(EVENT_SERIALIZER) private eventSerializer: IEventSerializer
+    private eventStoreSession: IEventStoreSession<U>,
+    @Inject(EVENT_SERIALIZER) private eventSerializer: IEventSerializer<T, U>,
+    @Inject(EVENT_DESERIALIZER)
+    private eventDeserializer: IEventDeserializer<T, U>
   ) {}
 
-  append(event: AnyEvent) {
-    const storedEvent = this.eventSerializer.serialize(event);
+  serializeEvent(event: T) {
+    return this.eventSerializer.serialize(event);
+  }
+
+  deserializeEvent(serializedEvent: U) {
+    return this.eventDeserializer.deserialize(serializedEvent);
+  }
+
+  append(event: T) {
+    const storedEvent = this.serializeEvent(event);
 
     this._storedEvents.push(storedEvent);
   }
