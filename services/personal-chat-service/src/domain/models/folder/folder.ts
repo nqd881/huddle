@@ -1,49 +1,27 @@
 import {
+  EntityBuilder,
   Id,
   Prop,
-  SnowflakeIdService,
   StateAggregateBase,
-  UseIdService,
+  StateAggregateBuilder,
 } from "ddd-node";
-import { ChatDescriptor } from "./chat-descriptor";
-import { FolderCreated } from "./events/folder-created";
+import { ChatDescriptor } from "../personal-chat/chat-descriptor";
 import { FolderDeleted } from "./events/folder-deleted";
-import { FolderFiltersUpdated } from "./events/folder-filters-updated";
+import { FolderFilterUpdated } from "./events/folder-filter-updated";
 import { FolderRenamed } from "./events/folder-renamed";
 import { FolderFilter } from "./folder-filter/folder-filter";
 import { FolderStatus } from "./folder-status";
-import { FolderEligibleChats } from "./folder-eligible-chats";
+import { Item } from "./item";
 
 export interface FolderProps {
   readonly ownerUserId: Id;
   name: string;
-  filters: FolderFilter[];
+  filter: FolderFilter;
+  items: Item[];
   status: FolderStatus;
 }
 
-export type CreateFolderProps = {
-  ownerUserId: Id;
-  name: string;
-  filters?: FolderFilter[];
-};
-
-@UseIdService(new SnowflakeIdService())
 export class Folder extends StateAggregateBase<FolderProps> {
-  static create(props: CreateFolderProps) {
-    const { ownerUserId, name, filters } = props;
-
-    const newFolder = Folder.newAggregate({
-      ownerUserId,
-      name,
-      filters: filters ?? [],
-      status: FolderStatus.Active,
-    });
-
-    newFolder.recordEvent(FolderCreated, { name, ownerUserId });
-
-    return newFolder;
-  }
-
   @Prop()
   declare ownerUserId: Id;
 
@@ -51,10 +29,13 @@ export class Folder extends StateAggregateBase<FolderProps> {
   declare name: string;
 
   @Prop()
-  declare filters: FolderFilter[];
+  declare filter: FolderFilter;
 
   @Prop()
   declare status: FolderStatus;
+
+  @Prop()
+  declare items: Item[];
 
   rename(name: string) {
     this._props.name = name;
@@ -62,10 +43,20 @@ export class Folder extends StateAggregateBase<FolderProps> {
     this.recordEvent(FolderRenamed, { name });
   }
 
-  setFilters(filters: FolderFilter[]) {
-    this._props.filters = filters;
+  setFilter(filter: FolderFilter) {
+    this._props.filter = filter;
 
-    this.recordEvent(FolderFiltersUpdated, {});
+    const { includedIds, excludedIds, archived, muted, read, type } =
+      this.filter;
+
+    this.recordEvent(FolderFilterUpdated, {
+      includedIds,
+      excludedIds,
+      archived,
+      muted,
+      read,
+      type,
+    });
   }
 
   delete() {
@@ -76,14 +67,52 @@ export class Folder extends StateAggregateBase<FolderProps> {
     this.recordEvent(FolderDeleted, {});
   }
 
-  filter(chatDescriptors: ChatDescriptor[]): FolderEligibleChats {
-    const matches = chatDescriptors.filter((chatDescriptor) =>
-      this._props.filters.some((filter) => filter.matchesFilter(chatDescriptor))
-    );
+  getItem(chatId: Id) {
+    return this._props.items.find((item) => item.chatId === chatId);
+  }
 
-    return new FolderEligibleChats({
-      folderId: this.id(),
-      chatIds: matches.map((descriptor) => descriptor.chatId),
-    });
+  addItem(chatId: Id) {
+    const itemBuilder = new EntityBuilder(Item);
+
+    const item = itemBuilder.withProps({ chatId, pinned: false }).build();
+
+    this._props.items.push(item);
+  }
+
+  deleteItem(chatId: Id) {
+    this._props.items = this._props.items.filter(
+      (item) => item.chatId !== chatId
+    );
+  }
+
+  private syncItem(chatDescriptor: ChatDescriptor) {
+    const matches = this.filter.matchesFilter(chatDescriptor);
+    const item = this.getItem(chatDescriptor.chatId);
+
+    if (item && !matches) return this.deleteItem(chatDescriptor.chatId);
+
+    if (!item && matches) return this.addItem(chatDescriptor.chatId);
+  }
+
+  sync(chatDescriptors: ChatDescriptor[]) {
+    chatDescriptors.forEach((chatDescriptor) => this.syncItem(chatDescriptor));
+  }
+
+  pinChat(chatId: Id) {
+    const item = this.getItem(chatId);
+
+    if (!item) throw new Error();
+
+    item.pin();
+  }
+
+  unpinChat(chatId: Id) {
+    const item = this.getItem(chatId);
+
+    if (!item) throw new Error();
+
+    item.unpin();
   }
 }
+
+export const FolderBuilder = () => new StateAggregateBuilder(Folder);

@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Client } from "pg";
 import { EnvName } from "../../env/env.name";
 import { ClsService } from "nestjs-cls";
-import { MyClsStore } from "../app/my-cls-store";
+import { MyClsStore } from "../my-cls/my-cls-store";
 import { Transaction } from "sequelize";
 
 @Injectable()
@@ -52,6 +52,10 @@ export class DbService {
 
   currentTransaction() {
     return this.clsService.get("transaction");
+  }
+
+  clearTransaction() {
+    this.clsService.set("transaction", undefined);
   }
 
   setCurrentTransaction(transaction: Transaction) {

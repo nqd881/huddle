@@ -1,4 +1,4 @@
-import { Enum, EnumBase } from "ddd-node";
+import { Enum, EnumBase, EnumBuilder } from "ddd-node";
 
 export class UserStatus extends EnumBase {
   @Enum("active")
@@ -8,10 +8,12 @@ export class UserStatus extends EnumBase {
   static Inactive: UserStatus;
 
   isActive() {
-    return this.equals(UserStatus.Active);
+    return this === UserStatus.Active;
   }
 
   isInactive() {
-    return this.equals(UserStatus.Inactive);
+    return this === UserStatus.Inactive;
   }
 }
+
+export const UserStatusBuilder = () => new EnumBuilder(UserStatus);

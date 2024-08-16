@@ -1,8 +1,10 @@
 import { Body, Controller, Inject, Param, Post } from "@nestjs/common";
-import { PersonalChatAppService } from "../../../application/use-cases/personal-use-cases/personal-chat-service";
-import { PERSONAL_CHAT_APP_SERVICE } from "./token";
-import { CreatePersonalChatCommand } from "../../../application/use-cases/personal-use-cases/create-personal-chat";
-import { ArchivePersonalChatCommand } from "../../../application/use-cases/personal-use-cases/archive-personal-chat";
+import { App } from "../../../application/app";
+import { ArchivePersonalChatCommand } from "../../../application/use-cases/personal-chat/archive-personal-chat";
+import { CreatePersonalChatCommand } from "../../../application/use-cases/personal-chat/create-chat";
+import { AppCoreToken } from "../app-core";
+import { ClsService } from "nestjs-cls";
+import { MyClsStore } from "../my-cls";
 
 export interface PersonalChatParamsOfUser {
   userId: string;
@@ -11,8 +13,8 @@ export interface PersonalChatParamsOfUser {
 @Controller("personal_chats")
 export class PersonalChatController {
   constructor(
-    @Inject(PERSONAL_CHAT_APP_SERVICE)
-    private personalChatAppService: PersonalChatAppService
+    @Inject(AppCoreToken) private appCore: App,
+    private clsService: ClsService<MyClsStore>
   ) {}
 
   @Post()
@@ -21,19 +23,29 @@ export class PersonalChatController {
   ) {
     const { sourceChatId, ownerUserId, type } = body;
 
-    await this.personalChatAppService.createPersonalChat(
-      new CreatePersonalChatCommand({
-        sourceChatId,
-        ownerUserId,
-        type,
-      })
+    const userId = this.clsService.get("userId");
+
+    if (!userId) return;
+
+    await this.appCore.handleCommand(
+      new CreatePersonalChatCommand(
+        {
+          sourceChatId,
+          ownerUserId,
+          type,
+        },
+        { userId }
+      )
     );
   }
 
   @Post(":personal_chat_id/archive")
   async archive(@Param("personal_chat_id") personalChatId: string) {
-    await this.personalChatAppService.archivePersonalChat(
-      new ArchivePersonalChatCommand({ personalChatId })
+    await this.appCore.handleCommand(
+      new ArchivePersonalChatCommand(
+        { personalChatId },
+        { userId: this.clsService.get("userId") }
+      )
     );
   }
 }

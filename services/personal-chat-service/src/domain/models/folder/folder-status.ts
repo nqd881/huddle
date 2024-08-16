@@ -1,4 +1,4 @@
-import { Enum, EnumBase } from "ddd-node";
+import { Enum, EnumBase, EnumBuilder } from "ddd-node";
 
 export class FolderStatus extends EnumBase {
   @Enum("active")
@@ -8,10 +8,12 @@ export class FolderStatus extends EnumBase {
   static Deleted: FolderStatus;
 
   isActive() {
-    return this.equals(FolderStatus.Active);
+    return this === FolderStatus.Active;
   }
 
   isDeleted() {
-    return this.equals(FolderStatus.Deleted);
+    return this === FolderStatus.Deleted;
   }
 }
+
+export const FolderStatusBuilder = () => new EnumBuilder(FolderStatus);

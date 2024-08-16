@@ -1,219 +1,138 @@
-import { Injectable, Type } from "@nestjs/common";
-import { Id } from "ddd-node";
-import { toIdValues, toIds } from "../../../../application/utils/id";
+import { Injectable } from "@nestjs/common";
+import { EntityBuilder, StateAggregateBuilder } from "ddd-node";
 import { Folder } from "../../../../domain/models/folder/folder";
-import { ChatIdFilter } from "../../../../domain/models/folder/folder-filter/chat-id-filter";
-import { ChatMutedFilter } from "../../../../domain/models/folder/folder-filter/chat-muted-filter";
-import { ChatTypeFilter } from "../../../../domain/models/folder/folder-filter/chat-type-filter";
 import { FolderFilter } from "../../../../domain/models/folder/folder-filter/folder-filter";
-import { FolderStatus } from "../../../../domain/models/folder/folder-status";
-import { ChatType } from "../../../../domain/models/personal-chat/chat-type";
+import { FolderStatusBuilder } from "../../../../domain/models/folder/folder-status";
+import { Item } from "../../../../domain/models/folder/item";
+import { ChatTypeBuilder } from "../../../../domain/models/personal-chat/chat-type";
 import { IMapper } from "../../../interface/mapper";
 import {
-  ChatArchivedFilterModel,
-  ChatIdFilterModel,
-  ChatMutedFilterModel,
-  ChatReadFilterModel,
-  ChatTypeFilterModel,
   FolderFilterModel,
   FolderModel,
   FolderModelCreationAttributes,
 } from "./models";
-import { ChatReadFilter } from "../../../../domain/models/folder/folder-filter/chat-read-filter";
-import { ChatArchivedFilter } from "../../../../domain/models/folder/folder-filter/chat-archived-filter";
-import _ from "lodash";
+import { ItemModel } from "./models/item.model";
 
 @Injectable()
 export class FolderFilterMapper
   implements IMapper<FolderFilter, FolderFilterModel>
 {
   toDomain(model: FolderFilterModel): FolderFilter {
-    switch (true) {
-      case model instanceof ChatIdFilterModel: {
-        const { includedIds, excludedIds } = model as ChatIdFilterModel;
+    const { includedIds, excludedIds, archived, muted, read, type } = model;
 
-        return new ChatIdFilter({
-          includedIds: toIds(includedIds),
-          excludedIds: toIds(excludedIds),
-        });
-      }
-      case model instanceof ChatTypeFilterModel: {
-        const { type } = model as ChatTypeFilterModel;
-
-        return new ChatTypeFilter({ type: ChatType.parse(type) });
-      }
-      case model instanceof ChatMutedFilterModel: {
-        const { muted } = model as ChatMutedFilterModel;
-
-        return new ChatMutedFilter({ muted });
-      }
-      case model instanceof ChatReadFilterModel: {
-        const { read } = model as ChatReadFilterModel;
-
-        return new ChatReadFilter({ read });
-      }
-      case model instanceof ChatArchivedFilterModel: {
-        const { archived } = model as ChatArchivedFilterModel;
-
-        return new ChatArchivedFilter({ archived });
-      }
-      default:
-        throw new Error("Cannot map model to domain");
-    }
+    return new FolderFilter({
+      includedIds: includedIds ?? undefined,
+      excludedIds: excludedIds ?? undefined,
+      archived: archived ?? undefined,
+      muted: muted ?? undefined,
+      read: read ?? undefined,
+      type: type ? ChatTypeBuilder().withValue(type).build() : undefined,
+    });
   }
 
   toPersistence(model: FolderFilter): FolderFilterModel {
-    switch (true) {
-      case model instanceof ChatIdFilter: {
-        const { includedIds, excludedIds } = model as ChatIdFilter;
+    const { includedIds, excludedIds, archived, muted, read, type } = model;
 
-        return ChatIdFilterModel.build({
-          folderId: "",
-          includedIds: toIdValues(includedIds),
-          excludedIds: toIdValues(excludedIds),
-        });
-      }
-      case model instanceof ChatTypeFilter: {
-        const { type } = model as ChatTypeFilter;
+    return FolderFilterModel.build({
+      folderId: "",
+      includedIds,
+      excludedIds,
+      archived,
+      muted,
+      read,
+      type: type ? type.value.toString() : "",
+    });
+  }
+}
 
-        return ChatTypeFilterModel.build({
-          folderId: "",
-          type: type.value as string,
-        });
-      }
-      case model instanceof ChatMutedFilter: {
-        const { muted } = model as ChatMutedFilter;
+@Injectable()
+export class ItemMapper implements IMapper<Item, ItemModel> {
+  toDomain(model: ItemModel): Item {
+    const { chatId, pinned, pinnedDate } = model;
 
-        return ChatMutedFilterModel.build({
-          folderId: "",
-          muted,
-        });
-      }
-      case model instanceof ChatReadFilter: {
-        const { read } = model as ChatReadFilter;
+    const builder = new EntityBuilder(Item);
 
-        return ChatReadFilterModel.build({
-          folderId: "",
-          read,
-        });
-      }
-      case model instanceof ChatArchivedFilter: {
-        const { archived } = model as ChatArchivedFilter;
+    return builder
+      .withProps({
+        chatId,
+        pinned,
+        pinnedDate,
+      })
+      .build();
+  }
 
-        return ChatArchivedFilterModel.build({
-          folderId: "",
-          archived,
-        });
-      }
-      default:
-        throw new Error("Cannot map model to persistence");
-    }
+  toPersistence(model: Item): ItemModel {
+    const { chatId, pinned, pinnedDate } = model;
+
+    return ItemModel.build({
+      folderId: "",
+      chatId,
+      pinned,
+      pinnedDate,
+    });
   }
 }
 
 @Injectable()
 export class FolderMapper implements IMapper<Folder, FolderModel> {
-  constructor(private filterMapper: FolderFilterMapper) {}
+  constructor(
+    // private filterMapper: FolderFilterMapper,
+    private folderFilterMapper: FolderFilterMapper,
+    private itemMapper: ItemMapper
+  ) {}
 
   toDomain(persistenceModel: FolderModel): Folder {
-    const { id, name, ownerUserId, status, filters } = persistenceModel;
+    const { id, name, ownerUserId, status, filter, items } = persistenceModel;
 
-    return Folder.newAggregate(
-      {
+    const builder = new StateAggregateBuilder(Folder);
+
+    return builder
+      .withId(id)
+      .withProps({
         name,
-        ownerUserId: new Id(ownerUserId),
-        status: FolderStatus.parse(status),
-        filters: filters.map((filter) => this.filterMapper.toDomain(filter)),
-      },
-      Folder.id(id)
-    );
+        ownerUserId,
+        status: FolderStatusBuilder().withValue(status).build(),
+        filter: this.folderFilterMapper.toDomain(filter),
+        items: items.map((item) => this.itemMapper.toDomain(item)),
+      })
+      .build();
   }
 
   toPersistence(domainModel: Folder): FolderModel {
-    const { ownerUserId, name, status, filters } = domainModel.props();
+    const { ownerUserId, name, status, filter, items } = domainModel.props();
 
     const id = domainModel.id();
 
-    const parsedFilters = filters.map((filter) => {
-      const parsedFilter = this.filterMapper.toPersistence(filter);
-
-      parsedFilter.folderId = id.value;
-
-      return parsedFilter;
-    });
-
-    const findFilter = <T extends FolderFilterModel>(
-      filters: FolderFilterModel[],
-      model: Type<T>
-    ) => {
-      return filters.find((filter): filter is T => filter instanceof model);
-    };
-
-    const idFilter = findFilter(parsedFilters, ChatIdFilterModel);
-    const mutedFilter = findFilter(parsedFilters, ChatMutedFilterModel);
-    const readFilter = findFilter(parsedFilters, ChatReadFilterModel);
-    const typeFilter = findFilter(parsedFilters, ChatTypeFilterModel);
-    const archivedFilter = findFilter(parsedFilters, ChatArchivedFilterModel);
-
     const buildOpts: FolderModelCreationAttributes = {
-      id: id.value,
-      ownerUserId: ownerUserId.value,
+      id,
+      ownerUserId,
       name: name,
       status: status.value as string,
+      filter: {
+        ...this.folderFilterMapper.toPersistence(filter),
+        folderId: id,
+      },
+      items: items.map((item) => {
+        const itemModel = this.itemMapper.toPersistence(item);
+
+        return {
+          folderId: id,
+          chatId: itemModel.chatId,
+          pinned: itemModel.pinned,
+          pinnedDate: itemModel.pinnedDate,
+        };
+      }),
     };
-
-    if (idFilter)
-      buildOpts.idFilter = {
-        folderId: idFilter.folderId,
-        includedIds: idFilter.includedIds,
-        excludedIds: idFilter.excludedIds,
-      };
-
-    if (typeFilter)
-      buildOpts.typeFilter = {
-        folderId: typeFilter.folderId,
-        type: typeFilter.type,
-      };
-
-    if (mutedFilter)
-      buildOpts.mutedFilter = {
-        folderId: mutedFilter.folderId,
-        muted: mutedFilter.muted,
-      };
-
-    if (readFilter)
-      buildOpts.readFilter = {
-        folderId: readFilter.folderId,
-        read: readFilter.read,
-      };
-
-    if (archivedFilter)
-      buildOpts.archivedFilter = {
-        folderId: archivedFilter.folderId,
-        archived: archivedFilter.archived,
-      };
 
     return FolderModel.build(buildOpts, {
       include: [
         {
-          model: ChatIdFilterModel,
-          as: "idFilter",
+          model: FolderFilterModel,
+          as: "filter",
         },
         {
-          model: ChatMutedFilterModel,
-          as: "mutedFilter",
-        },
-        {
-          model: ChatTypeFilterModel,
-          as: "typeFilter",
-        },
-        {
-          model: ChatReadFilterModel,
-          as: "readFilter",
-        },
-        {
-          model: ChatArchivedFilterModel,
-          as: "archivedFilter",
+          model: ItemModel,
+          as: "items",
         },
       ],
     });

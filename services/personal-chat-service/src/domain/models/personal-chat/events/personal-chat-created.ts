@@ -1,4 +1,4 @@
-import { EventBase, Id } from "ddd-node";
+import { Event, EventBase, Id, Model } from "ddd-node";
 import { ChatType } from "../chat-type";
 
 export interface PersonalChatCreatedProps {
@@ -8,4 +8,6 @@ export interface PersonalChatCreatedProps {
   type: ChatType;
 }
 
+@Event("PERSONAL_CHAT_CREATED")
+@Model()
 export class PersonalChatCreated extends EventBase<PersonalChatCreatedProps> {}

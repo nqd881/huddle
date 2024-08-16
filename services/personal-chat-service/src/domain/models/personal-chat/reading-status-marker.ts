@@ -1,4 +1,10 @@
-import { Enum, EnumBase, Prop, ValueObjectBase } from "ddd-node";
+import {
+  Enum,
+  EnumBase,
+  Prop,
+  ValueObjectBase,
+  ValueObjectBuilder,
+} from "ddd-node";
 
 export class ReadingStatus extends EnumBase {
   @Enum("read")
@@ -14,16 +20,38 @@ export interface ReadingStatusMarkerProps {
 }
 
 export class ReadingStatusMarker extends ValueObjectBase<ReadingStatusMarkerProps> {
-  static newMarker(status: ReadingStatus) {
-    return new ReadingStatusMarker({
-      status,
-      markedDate: new Date(),
-    });
-  }
-
   @Prop()
   declare status: ReadingStatus;
 
   @Prop()
   declare markedDate: Date;
+}
+
+export class ReadingStatusMarkerBuilder extends ValueObjectBuilder<ReadingStatusMarker> {
+  protected status?: ReadingStatus;
+  protected markedDate = new Date();
+
+  constructor() {
+    super(ReadingStatusMarker);
+  }
+
+  withStatus(status: ReadingStatus) {
+    this.status = status;
+    return this;
+  }
+
+  withMarkedDate(date: Date) {
+    this.markedDate = date;
+    return this;
+  }
+
+  build(): ReadingStatusMarker {
+    if (this.props) return super.build();
+
+    if (!this.status) throw new Error();
+
+    this.withProps({ status: this.status, markedDate: this.markedDate });
+
+    return super.build();
+  }
 }

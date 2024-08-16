@@ -1,6 +1,6 @@
 import { Type } from "../utils/type";
 
-// AppEvent can be a domain event or an integration event
+// integration event
 export interface IAppEvent {}
 
 export interface IAppEventHandler<T extends IAppEvent = IAppEvent> {

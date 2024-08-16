@@ -1,12 +1,12 @@
 import { Prop } from "ddd-node";
-import { ChatDescriptor } from "../chat-descriptor";
-import { FolderFilter } from "./folder-filter";
+import { ChatDescriptor } from "../../personal-chat/chat-descriptor";
+import { FolderFilterBase } from "./folder-filter.base";
 
 export interface ChatReadFilterProps {
   read: boolean;
 }
 
-export class ChatReadFilter extends FolderFilter<ChatReadFilterProps> {
+export class ChatReadFilter extends FolderFilterBase<ChatReadFilterProps> {
   @Prop()
   declare read: boolean;
 

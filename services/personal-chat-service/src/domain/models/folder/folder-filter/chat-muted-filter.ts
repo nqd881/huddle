@@ -1,12 +1,12 @@
 import { Prop } from "ddd-node";
-import { ChatDescriptor } from "../chat-descriptor";
-import { FolderFilter } from "./folder-filter";
+import { ChatDescriptor } from "../../personal-chat/chat-descriptor";
+import { FolderFilterBase } from "./folder-filter.base";
 
 export interface ChatMutedFilterProps {
   muted: boolean;
 }
 
-export class ChatMutedFilter extends FolderFilter<ChatMutedFilterProps> {
+export class ChatMutedFilter extends FolderFilterBase<ChatMutedFilterProps> {
   @Prop()
   declare muted: boolean;
 

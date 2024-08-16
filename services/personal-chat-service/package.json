@@ -29,7 +29,7 @@
     "@nestjs/sequelize": "^10.0.1",
     "axios": "^1.7.2",
     "date-fns": "^3.2.0",
-    "ddd-node": "^18.0.0",
+    "ddd-node": "^24.0.0",
     "dotenv": "^16.4.5",
     "inversify": "^6.0.2",
     "kafkajs": "^2.2.4",
@@ -40,6 +40,7 @@
     "rxjs": "^7.8.1",
     "sequelize": "^6.37.1",
     "sequelize-typescript": "^2.1.6",
+    "type-fest": "^4.20.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

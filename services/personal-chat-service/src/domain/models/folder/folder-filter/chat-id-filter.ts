@@ -1,13 +1,13 @@
 import { Id, Prop } from "ddd-node";
-import { ChatDescriptor } from "../chat-descriptor";
-import { FolderFilter } from "./folder-filter";
+import { ChatDescriptor } from "../../personal-chat/chat-descriptor";
+import { FolderFilterBase } from "./folder-filter.base";
 
 export interface ChatIdFilterProps {
   includedIds: Id[];
   excludedIds: Id[];
 }
 
-export class ChatIdFilter extends FolderFilter<ChatIdFilterProps> {
+export class ChatIdFilter extends FolderFilterBase<ChatIdFilterProps> {
   @Prop()
   declare includedIds: Id[];
 
@@ -16,11 +16,11 @@ export class ChatIdFilter extends FolderFilter<ChatIdFilterProps> {
 
   matchesFilter(chatDescriptor: ChatDescriptor): boolean {
     return (
-      this.includedIds.some((includedId) =>
-        chatDescriptor.chatId.equals(includedId)
+      this.includedIds.some(
+        (includedId) => chatDescriptor.chatId === includedId
       ) ||
-      !this.excludedIds.some((excludedId) =>
-        chatDescriptor.chatId.equals(excludedId)
+      !this.excludedIds.some(
+        (excludedId) => chatDescriptor.chatId === excludedId
       )
     );
   }

@@ -12,13 +12,14 @@ export interface StoredEventModelAttributes {
   eventId: string;
   eventOccurredOn: Date;
   eventSource: string;
+  eventContext: string;
   eventPayload: string;
 }
 
 export interface StoredEventModelCreationAttributes {}
 
 @Table({
-  tableName: "events",
+  tableName: "domain_events",
   createdAt: false,
   updatedAt: false,
 })
@@ -41,6 +42,9 @@ export class StoredEventModel extends Model<
 
   @Column
   declare eventSource: string;
+
+  @Column
+  declare eventContext: string;
 
   @Column
   declare eventPayload: string;

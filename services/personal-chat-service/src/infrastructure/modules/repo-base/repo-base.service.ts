@@ -6,7 +6,6 @@ import { IMapper } from "../../interface/mapper";
 import { DbService } from "../db/db.service";
 import { DomainUnit } from "../domain-unit/domain-unit";
 import { DomainUnitService } from "../domain-unit/domain-unit.service";
-import { EventBus } from "../event-bus/event-bus";
 import { EventStore, IEventStore } from "../event-store";
 import {
   SequelizeUpdateService,
@@ -29,15 +28,10 @@ export class RepoBaseService {
   constructor(
     private sequelize: Sequelize,
     private dbService: DbService,
-    // private eventBus: EventBus,
     private updateService: SequelizeUpdateService,
     private domainUnitService: DomainUnitService,
     private eventStore: EventStore
   ) {}
-
-  // eventPublisher() {
-  //   return new DomainEventPublisher(this.eventBus);
-  // }
 
   eventDispatcher(): IEventDispatcher {
     return new EventStoreDispatcher(this.eventStore);
@@ -61,6 +55,8 @@ export class RepoBaseService {
         console.log(err);
 
         await transaction.rollback();
+      } finally {
+        this.dbService.clearTransaction();
       }
     } else {
       await callback(transaction);
@@ -86,16 +82,12 @@ export class RepoBaseService {
   }
 
   async findMany<T extends DomainModel, U extends PersistenceModel>(
-    findingFn: () => Promise<(U | null)[]>,
+    findingFn: () => Promise<U[]>,
     mapper: IMapper<T, U>
   ) {
     const result = await findingFn();
 
-    if (!result) return result;
-
     const domainUnits = result.map((persistenceModel) => {
-      if (!persistenceModel) return null;
-
       const domainUnit = new DomainUnit(mapper).loadPersistenceModel(
         persistenceModel.id,
         persistenceModel
@@ -106,9 +98,7 @@ export class RepoBaseService {
       return domainUnit;
     });
 
-    return domainUnits.map(
-      (domainUnit) => domainUnit?.getDomainModel() ?? null
-    );
+    return domainUnits.map((domainUnit) => domainUnit.getDomainModel()!);
   }
 
   async save<T extends DomainModel, U extends PersistenceModel>(
@@ -116,7 +106,7 @@ export class RepoBaseService {
     mapper: IMapper<T, U>
   ) {
     return this.transaction(async (transaction) => {
-      const id = instance.id().value;
+      const id = instance.id();
 
       const domainUnit =
         this.domainUnitService.getDomainUnit<T, U>(id) ??
@@ -141,13 +131,6 @@ export class RepoBaseService {
       instance.dispatchEvents(this.eventDispatcher());
 
       await this.eventStore.store();
-
-      // await instance.publishEvents(this.eventPublisher());
-
-      // this.eventStore.append(instance.events()) (event store use a thing is session, that mean session can access to current transaction)
-      // Then EventStore will save events into db in same transaction -> Debezium is watching changes from outbox table will publish message to message broker (Kafka)
-      // Then have something (??? - maybe call MessageConsumer) will listen kafka topic to receive domain event message
-      // Then it will use an domain event publisher to publish that event (after deserialized) to subscribers
 
       return domainUnit.getPersistenceModel();
     });

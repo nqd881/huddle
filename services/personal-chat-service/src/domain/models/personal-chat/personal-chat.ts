@@ -1,4 +1,4 @@
-import { StateAggregateBase, Id, Prop } from "ddd-node";
+import { StateAggregateBase, Id, Prop, StateAggregateBuilder } from "ddd-node";
 import { Notifications } from "../notifications";
 import { ChatType } from "./chat-type";
 import {
@@ -12,46 +12,47 @@ import { PersonalChatCreated } from "./events/personal-chat-created";
 import { ReadingStatusMarker } from "./reading-status-marker";
 
 export interface PersonalChatProps {
-  readonly sourceChatId: Id;
   readonly ownerUserId: Id;
   type: ChatType;
-  notifications: Notifications;
+  // notifications: Notifications;
   archived: boolean;
-  readingStatusMarker?: ReadingStatusMarker;
+  // readingStatusMarker?: ReadingStatusMarker;
 }
 
-export type CreatePersonalChatProps = {
-  sourceChatId: Id;
-  ownerUserId: Id;
-  type: ChatType;
-};
+// export type CreatePersonalChatProps = {
+//   ownerUserId: Id;
+//   type: ChatType;
+// };
 
 export class PersonalChat extends StateAggregateBase<PersonalChatProps> {
   static DefaultNotifications: Notifications = new Notifications({});
 
-  static create(props: CreatePersonalChatProps) {
-    const { sourceChatId, ownerUserId, type } = props;
+  // static create(props: CreatePersonalChatProps) {
+  //   const { ownerUserId, type } = props;
 
-    const personalChat = this.newAggregate({
-      sourceChatId,
-      ownerUserId,
-      type,
-      notifications: this.DefaultNotifications,
-      archived: false,
-    });
+  //   const builder = new StateAggregateBuilder(PersonalChat);
 
-    personalChat.recordEvent(PersonalChatCreated, {
-      personalChatId: personalChat.id(),
-      sourceChatId: personalChat.sourceChatId,
-      ownerUserId: personalChat.ownerUserId,
-      type: personalChat.type,
-    });
+  //   const personalChat = builder
+  //     .withProps({
+  //       ownerUserId,
+  //       type,
+  //       notifications: this.DefaultNotifications,
+  //       archived: false,
+  //     })
+  //     .build();
 
-    return personalChat;
-  }
+  //   personalChat.recordEvent(PersonalChatCreated, {
+  //     personalChatId: personalChat.id(),
+  //     sourceChatId: personalChat.sourceChatId,
+  //     ownerUserId: personalChat.ownerUserId,
+  //     type: personalChat.type,
+  //   });
 
-  @Prop()
-  declare sourceChatId: Id;
+  //   return personalChat;
+  // }
+
+  // @Prop()
+  // declare sourceChatId: Id;
 
   @Prop()
   declare ownerUserId: Id;
@@ -60,54 +61,70 @@ export class PersonalChat extends StateAggregateBase<PersonalChatProps> {
   declare type: ChatType;
 
   @Prop()
-  declare notifications: Notifications;
-
+  // declare notifications: Notifications;
   @Prop()
-  declare readingStatusMarker: ReadingStatusMarker;
-
+  // declare readingStatusMarker: ReadingStatusMarker;
   @Prop()
   declare archived: boolean;
 
-  isMarked() {
-    return Boolean(this.readingStatusMarker);
-  }
+  // isMarked() {
+  //   return Boolean(this.readingStatusMarker);
+  // }
 
-  mark(marker: ReadingStatusMarker) {
-    this._props.readingStatusMarker = marker;
+  // isMarkedAsRead() {}
 
-    this.recordEvent(PersonalChatMarked, {
-      status: this._props.readingStatusMarker!.status,
-      markedDate: this._props.readingStatusMarker!.markedDate,
-    });
-  }
+  // isMuted() {
+  //   return this.notifications.isMuted();
+  // }
 
-  unmark() {
-    if (!this.isMarked()) throw new Error("Chat is not marked");
+  // mark(marker: ReadingStatusMarker) {
+  //   this._props.readingStatusMarker = marker;
 
-    this._props.readingStatusMarker = undefined;
+  //   this.recordEvent(PersonalChatMarked, {
+  //     status: this._props.readingStatusMarker!.status,
+  //     markedDate: this._props.readingStatusMarker!.markedDate,
+  //   });
+  // }
 
-    this.recordEvent(PersonalChatUnmarked, {});
-  }
+  // unmark() {
+  //   if (!this.isMarked()) return;
 
-  setNotifications(notifications: Notifications) {
-    this._props.notifications = notifications;
+  //   this._props.readingStatusMarker = undefined;
 
-    this.recordEvent(PersonalChatNotificationsUpdated, {});
-  }
+  //   this.recordEvent(PersonalChatUnmarked, {});
+  // }
+
+  // setNotifications(notifications: Notifications) {
+  //   this._props.notifications = notifications;
+
+  //   this.recordEvent(PersonalChatNotificationsUpdated, {});
+  // }
 
   archive() {
-    if (this.archived) throw new Error("Chat is archived");
+    if (this.archived) return;
 
     this._props.archived = true;
 
-    this.recordEvent(PersonalChatArchived, {});
+    this.recordEvent(PersonalChatArchived, {
+      userId: this.ownerUserId,
+      chatId: this.id(),
+    });
   }
 
   unarchive() {
-    if (!this.archived) throw new Error("Chat is not archived");
+    if (!this.archived) return;
 
     this._props.archived = false;
 
-    this.recordEvent(PersonalChatUnarchived, {});
+    this.recordEvent(PersonalChatUnarchived, {
+      userId: this.ownerUserId,
+      chatId: this.id(),
+    });
+  }
+}
+
+export class PersonalChatBuilder extends StateAggregateBuilder<PersonalChat> {
+  constructor() {
+    super(PersonalChat);
   }
 }

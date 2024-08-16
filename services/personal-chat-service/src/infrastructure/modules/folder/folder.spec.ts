@@ -7,12 +7,8 @@ import { IMemoryDb, newDb } from "pg-mem";
 import request from "supertest";
 import { v4 } from "uuid";
 import { AppCommand } from "../../../application/base/app-command";
-import { FolderCreated } from "../../../domain/models/folder/events/folder-created";
-import { CommandBusModule } from "../command-bus/command-bus.module";
-import { EventBusModule } from "../event-bus/event-bus.module";
 import { FolderRepo } from "../repositories/folder-repo/folder-repo";
 import { FolderModule } from "./folder.module";
-import { FolderItemRepo } from "./folder-item-repo/folder-item-repo";
 
 describe("Folder Test", function () {
   type MyClsStore = { userId: string };
@@ -22,7 +18,6 @@ describe("Folder Test", function () {
   let clsService: ClsService<MyClsStore>;
   let app: INestApplication;
   let folderRepo: FolderRepo;
-  let folderItemRepo: FolderItemRepo;
   let userId: string;
   let folderId: string;
   let chatId: string;
@@ -36,33 +31,6 @@ describe("Folder Test", function () {
     testModule = await Test.createTestingModule({
       imports: [
         ClsModule.forRoot({
-          global: true,
-        }),
-        CommandBusModule.forRootAsync({
-          useFactory: (clsService: ClsService<MyClsStore>) => {
-            return {
-              hooks: {
-                beforeExecute: (command: AppCommand) => {
-                  command.setMetadata({ userId: clsService.get("userId") });
-                },
-              },
-            };
-          },
-          inject: [ClsService],
-          global: true,
-        }),
-        EventBusModule.forRoot({
-          handlers: [
-            {
-              eventTypes() {
-                return [FolderCreated];
-              },
-
-              async handleEvent(event: FolderCreated) {
-                folderId = event.source().aggregateId.value;
-              },
-            },
-          ],
           global: true,
         }),
         SequelizeModule.forRoot({
@@ -79,7 +47,6 @@ describe("Folder Test", function () {
 
     clsService = await testModule.resolve(ClsService);
     folderRepo = await testModule.resolve(FolderRepo);
-    folderItemRepo = await testModule.resolve(FolderItemRepo);
 
     app = testModule.createNestApplication();
     await app.init();
@@ -104,7 +71,7 @@ describe("Folder Test", function () {
           .set("Accept", "application/json")
           .expect(201);
 
-        const folder = await folderRepo.findById(new Id(folderId));
+        const folder = await folderRepo.findById(folderId);
 
         expect(folder).not.toBeNull;
       }
@@ -129,7 +96,7 @@ describe("Folder Test", function () {
         .set("Accept", "application/json")
         .expect(201);
 
-      const folder = await folderRepo.findById(new Id(folderId));
+      const folder = await folderRepo.findById(folderId);
 
       expect(folder?.filters.length).toBe(5);
     });

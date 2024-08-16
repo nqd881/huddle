@@ -1,5 +1,5 @@
 import { DynamicModule, Module, OnModuleInit } from "@nestjs/common";
-import { DebeziumService } from "./debezium.service";
+import { KafkaConnectService } from "./kafka-connect.service";
 import { KAFKA_CONNECT_URL } from "./token";
 
 export interface DebeziumOptions {
@@ -12,11 +12,10 @@ export interface DebeziumModuleOptions extends DebeziumOptions {
 
 @Module({
   imports: [],
-  providers: [DebeziumService],
-  exports: [DebeziumService],
+  providers: [KafkaConnectService],
 })
 export class DebeziumModule implements OnModuleInit {
-  constructor(private debeziumService: DebeziumService) {}
+  constructor(private kafkaConnectService: KafkaConnectService) {}
 
   async onModuleInit() {
     //  TODO:
@@ -24,10 +23,10 @@ export class DebeziumModule implements OnModuleInit {
     // if has diff between current connector config and last config in db,
     // check if connector has already exist in kafka-connect, delete and recreate, if not, create new connector
 
-    const connectors = await this.debeziumService.getConnectors();
+    const connectors = await this.kafkaConnectService.getConnectors();
 
     const connectorConfig = {
-      name: "personal_chat_service_event_connector",
+      name: "personal_chat_service_domain_event_connector",
       config: {
         "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
         "key.converter": "org.apache.kafka.connect.json.JsonConverter",
@@ -40,17 +39,17 @@ export class DebeziumModule implements OnModuleInit {
         "database.password": "secret",
         "database.dbname": "postgres",
         "topic.prefix": "test",
-        "table.include.list": "public.events",
+        "table.include.list": "public.domain_events",
       },
     };
 
     if (connectors.includes(connectorConfig.name)) {
-      await this.debeziumService.deleteConnector(connectorConfig.name);
+      await this.kafkaConnectService.deleteConnector(connectorConfig.name);
 
       // return;
     }
 
-    await this.debeziumService.createConnector(connectorConfig);
+    await this.kafkaConnectService.createConnector(connectorConfig);
   }
 
   static forRoot(options: DebeziumModuleOptions): DynamicModule {

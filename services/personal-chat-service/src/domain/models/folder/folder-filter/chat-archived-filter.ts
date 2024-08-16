@@ -1,12 +1,12 @@
 import { Prop } from "ddd-node";
-import { ChatDescriptor } from "../chat-descriptor";
-import { FolderFilter } from "./folder-filter";
+import { ChatDescriptor } from "../../personal-chat/chat-descriptor";
+import { FolderFilterBase } from "./folder-filter.base";
 
 export interface ChatArchivedFilterProps {
   archived: boolean;
 }
 
-export class ChatArchivedFilter extends FolderFilter<ChatArchivedFilterProps> {
+export class ChatArchivedFilter extends FolderFilterBase<ChatArchivedFilterProps> {
   @Prop()
   declare archived: boolean;
 

@@ -1,32 +1,33 @@
 import { Module } from "@nestjs/common";
-import { ClsModule } from "nestjs-cls";
-import { CommandBusModule } from "../command-bus/command-bus.module";
+import { AppCoreModule } from "../app-core";
 import { DbModule } from "../db/db.module";
 import { DebeziumModule } from "../debezium/debezium.module";
-import { DomainEventPublisherModule } from "../domain-event-publisher/domain-event-publisher.module";
-import { DomainRegistryModule } from "../domain-registry/domain-registry.module";
+import { DomainEventListenerModule } from "../domain-event-listener/domain-event-listener.module";
 import { EnvConfigModule } from "../env-config/env-config.module";
-import { EventBusModule } from "../event-bus/event-bus.module";
 import { FolderModule } from "../folder/folder.module";
+import { MyClsModule } from "../my-cls/my-cls.module";
 import { MyEventStoreModule } from "../my-event-store/my-event-store.module";
 import { PersonalChatModule } from "../personal-chat/personal-chat.module";
+import { RepoRegistryModule } from "../repo-registry/repo-registry.module";
+import { UserModule } from "../user/user.module";
+import { DomainModelSerdesModule } from "../domain-model-serdes/domain-model-serdes.module";
+import { domainManager } from "ddd-node";
 
 @Module({
   imports: [
-    EnvConfigModule,
-    DbModule.forRoot(),
-    ClsModule.forRoot({
-      middleware: {
-        mount: true,
-      },
+    DomainModelSerdesModule.forRootAsync({
+      useFactory: () => domainManager.getDomain(),
       global: true,
     }),
-    CommandBusModule.forRoot({ global: true }),
-    EventBusModule.forRoot({ global: true }),
+    EnvConfigModule,
+    MyClsModule,
+    DbModule.forRoot(),
+    RepoRegistryModule,
+    AppCoreModule,
     MyEventStoreModule,
     DebeziumModule.forRoot({ kafkaConnectUrl: "http://localhost:8083" }),
-    DomainRegistryModule,
-    DomainEventPublisherModule,
+    DomainEventListenerModule,
+    UserModule,
     PersonalChatModule,
     FolderModule,
   ],

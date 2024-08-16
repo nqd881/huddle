@@ -2,7 +2,7 @@ services:
   zookeeper-service:
     image: debezium/zookeeper
     networks:
-      - debezium-network
+      - personal-chat-network
     ports:
       - "2181:2181"
       - "2888:2888"
@@ -17,7 +17,7 @@ services:
   kafka-service:
     image: debezium/kafka
     networks:
-      - debezium-network
+      - personal-chat-network
     ports:
       - "9092:9092"
     environment:
@@ -35,7 +35,7 @@ services:
   postgres-service:
     image: debezium/postgres:16-alpine
     networks:
-      - debezium-network
+      - personal-chat-network
     ports:
       - "5432:5432"
     environment:
@@ -49,18 +49,113 @@ services:
     depends_on:
       - kafka-service
 
+  # kafka-connect-service:
+  #   image: debezium/connect
+  #   networks:
+  #     - personal-chat-network
+  #   ports:
+  #     - "8083:8083"
+  #   environment:
+  #     BOOTSTRAP_SERVERS: kafka-service:9092
+  #     GROUP_ID: 1
+  #     CONFIG_STORAGE_TOPIC: my_connect_configs
+  #     OFFSET_STORAGE_TOPIC: my_connect_offsets
+  #     STATUS_STORAGE_TOPIC: my_connect_statuses
+  #   depends_on:
+  #     kafka-service:
+  #       condition: service_started
+  #       restart: true
+  #     postgres-service:
+  #       condition: service_healthy
+  #       restart: true
+
+  # kafka-connect-service:
+  #   image: confluentinc/cp-kafka-connect-base:latest
+  #   networks:
+  #     - personal-chat-network
+  #   ports:
+  #     - "8083:8083"
+  #   volumes:
+  #     - type: bind
+  #       source: ./debezium-connector-postgres
+  #       target: /usr/share/java/debezium-connector-postgres
+  #   environment:
+  #     CONNECT_BOOTSTRAP_SERVERS: kafka-service:9092
+  #     CONNECT_GROUP_ID: 1
+  #     CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_CONFIG_STORAGE_TOPIC: my-connect-configs
+  #     CONNECT_OFFSET_STORAGE_TOPIC: my-connect-offsets
+  #     CONNECT_STATUS_STORAGE_TOPIC: my-connect-statuses
+  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect-service"
+  #     CONNECT_PLUGIN_PATH: /usr/share/java
+  #   depends_on:
+  #     kafka-service:
+  #       condition: service_started
+  #       restart: true
+  #     postgres-service:
+  #       condition: service_healthy
+  #       restart: true
+
+  # kafka-connect-service:
+  #   image: my-kafka-connect
+  #   build:
+  #     dockerfile: ./my-kafka-connect.dockerfile
+  #   networks:
+  #     - personal-chat-network
+  #   ports:
+  #     - "8083:8083"
+  #   environment:
+  #     CONNECT_BOOTSTRAP_SERVERS: kafka-service:9092
+  #     CONNECT_GROUP_ID: 1
+  #     CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+  #     CONNECT_CONFIG_STORAGE_TOPIC: my-connect-configs
+  #     CONNECT_OFFSET_STORAGE_TOPIC: my-connect-offsets
+  #     CONNECT_STATUS_STORAGE_TOPIC: my-connect-statuses
+  #     CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+  #     CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect-service"
+  #     # CONNECT_PLUGIN_PATH: /usr/share/java
+  #   depends_on:
+  #     kafka-service:
+  #       condition: service_started
+  #       restart: true
+  #     postgres-service:
+  #       condition: service_healthy
+  #       restart: true
+
   kafka-connect-service:
-    image: debezium/connect
+    image: my-kafka-connect-2
+    build:
+      dockerfile: ./my-kafka-connect-2.dockerfile
     networks:
-      - debezium-network
+      - personal-chat-network
     ports:
       - "8083:8083"
     environment:
-      BOOTSTRAP_SERVERS: kafka-service:9092
-      GROUP_ID: 1
-      CONFIG_STORAGE_TOPIC: my_connect_configs
-      OFFSET_STORAGE_TOPIC: my_connect_offsets
-      STATUS_STORAGE_TOPIC: my_connect_statuses
+      CONNECT_BOOTSTRAP_SERVERS: kafka-service:9092
+      CONNECT_GROUP_ID: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_CONFIG_STORAGE_TOPIC: my-connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: my-connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: my-connect-statuses
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect-service"
+      # CONNECT_PLUGIN_PATH: /usr/share/java
     depends_on:
       kafka-service:
         condition: service_started
@@ -70,4 +165,6 @@ services:
         restart: true
 
 networks:
-  debezium-network:
+  personal-chat-network:
+# volumes:
+#   debezium-connector-postgres:

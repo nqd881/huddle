@@ -1,3 +1,10 @@
-import { EmptyProps, EventBase } from "ddd-node";
+import { Event } from "ddd-node";
+import {
+  PersonalChatEvent,
+  PersonalChatEventProps,
+} from "./personal-chat-event.base";
 
-export class PersonalChatArchived extends EventBase<EmptyProps> {}
+export interface PersonalChatArchivedProps extends PersonalChatEventProps {}
+
+@Event("PERSONAL_CHAT_ARCHIVED")
+export class PersonalChatArchived extends PersonalChatEvent<PersonalChatArchivedProps> {}

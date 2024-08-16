@@ -1,101 +1,56 @@
+import { DataTypes } from "sequelize";
 import {
+  AllowNull,
   Column,
-  DataType,
   Model,
   PrimaryKey,
   Table,
 } from "sequelize-typescript";
+import { SetRequired } from "type-fest";
 
 export interface FolderFilterModelAttributes {
   folderId: string;
+  includedIds: string[] | null;
+  excludedIds: string[] | null;
+  archived: boolean | null;
+  muted: boolean | null;
+  read: boolean | null;
+  type: string | null;
 }
 
-export class FolderFilterModel<
-    T extends FolderFilterModelAttributes = FolderFilterModelAttributes
-  >
-  extends Model<T>
-  implements FolderFilterModelAttributes
-{
+export interface FolderFilterModelCreationAttributes
+  extends SetRequired<Partial<FolderFilterModelAttributes>, "folderId"> {}
+
+@Table({ tableName: "folder_filter", createdAt: false, updatedAt: false })
+export class FolderFilterModel extends Model<
+  FolderFilterModelAttributes,
+  FolderFilterModelCreationAttributes
+> {
   @PrimaryKey
   @Column
   declare folderId: string;
-}
 
-export interface ChatIdFilterModelAttributes
-  extends FolderFilterModelAttributes {
-  includedIds: string[];
-  excludedIds: string[];
-}
+  @AllowNull
+  @Column(DataTypes.ARRAY(DataTypes.STRING))
+  declare includedIds: string[] | null;
 
-@Table({
-  tableName: "chat_id_filter",
-  createdAt: false,
-  updatedAt: false,
-})
-export class ChatIdFilterModel extends FolderFilterModel<ChatIdFilterModelAttributes> {
-  @Column(DataType.ARRAY(DataType.STRING))
-  declare includedIds: string[];
+  @AllowNull
+  @Column(DataTypes.ARRAY(DataTypes.STRING))
+  declare excludedIds: string[] | null;
 
-  @Column(DataType.ARRAY(DataType.STRING))
-  declare excludedIds: string[];
-}
+  @AllowNull
+  @Column(DataTypes.BOOLEAN)
+  declare archived: boolean | null;
 
-export interface ChatTypeFilterModelAttributes
-  extends FolderFilterModelAttributes {
-  type: string;
-}
+  @AllowNull
+  @Column(DataTypes.BOOLEAN)
+  declare muted: boolean | null;
 
-@Table({
-  tableName: "chat_type_filter",
-  createdAt: false,
-  updatedAt: false,
-})
-export class ChatTypeFilterModel extends FolderFilterModel<ChatTypeFilterModelAttributes> {
-  @Column
-  declare type: string;
-}
+  @AllowNull
+  @Column(DataTypes.BOOLEAN)
+  declare read: boolean | null;
 
-export interface ChatMutedFilterModelAttributes
-  extends FolderFilterModelAttributes {
-  muted: boolean;
-}
-
-@Table({
-  tableName: "chat_muted_filter",
-  createdAt: false,
-  updatedAt: false,
-})
-export class ChatMutedFilterModel extends FolderFilterModel<ChatMutedFilterModelAttributes> {
-  @Column
-  declare muted: boolean;
-}
-
-export interface ChatArchivedFilterModelAttributes
-  extends FolderFilterModelAttributes {
-  archived: boolean;
-}
-
-@Table({
-  tableName: "chat_archived_filter",
-  createdAt: false,
-  updatedAt: false,
-})
-export class ChatArchivedFilterModel extends FolderFilterModel<ChatArchivedFilterModelAttributes> {
-  @Column
-  declare archived: boolean;
-}
-
-export interface ChatReadFilterModelAttributes
-  extends FolderFilterModelAttributes {
-  read: boolean;
-}
-
-@Table({
-  tableName: "chat_read_filter",
-  createdAt: false,
-  updatedAt: false,
-})
-export class ChatReadFilterModel extends FolderFilterModel<ChatReadFilterModelAttributes> {
-  @Column
-  declare read: boolean;
+  @AllowNull
+  @Column(DataTypes.STRING)
+  declare type: string | null;
 }

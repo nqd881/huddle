@@ -5,22 +5,21 @@ import {
   IEventSerializer,
   IEventStoreSession,
 } from "../event-store";
-import {
-  MyEventDeserializer,
-  MyEventDeserializerModule,
-} from "./my-event-deserializer";
-import { MyEventSerializer } from "./my-event-serializer/my-event-serializer";
-import { MyEventSerializerModule } from "./my-event-serializer/my-event-serializer.module";
+
 import { MyEventStoreSession } from "./my-event-store-session/my-event-store-session";
 import { MyEventStoreSessionModule } from "./my-event-store-session/my-event-store-session.module";
+import { DomainModule } from "../domain";
+import { MyEventSerdesModule } from "./my-event-serdes/my-event-serdes.module";
+import { DomainEventSerializer } from "./my-event-serdes/domain-event-serializer";
+import { DomainEventDeserializer } from "./my-event-serdes/domain-event-deserializer";
 
 @Module({
   imports: [
     EventStoreModule.forRootAsync({
       imports: [
+        DomainModule.forRoot(),
         MyEventStoreSessionModule,
-        MyEventSerializerModule,
-        MyEventDeserializerModule,
+        MyEventSerdesModule,
       ],
       useFactory: (
         session: IEventStoreSession,
@@ -33,7 +32,11 @@ import { MyEventStoreSessionModule } from "./my-event-store-session/my-event-sto
           deserializer,
         };
       },
-      inject: [MyEventStoreSession, MyEventSerializer, MyEventDeserializer],
+      inject: [
+        MyEventStoreSession,
+        DomainEventSerializer,
+        DomainEventDeserializer,
+      ],
       global: true,
     }),
   ],

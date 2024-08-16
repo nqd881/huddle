@@ -34,7 +34,10 @@ export class DomainUnit<T = any, U = any> {
     return this;
   }
 
-  loadPersistenceModel(id: string, persistenceModel: U) {
+  loadPersistenceModel(
+    id: string,
+    persistenceModel: U
+  ): LoadedDomainUnit<T, U> {
     if (this.isLoaded()) return this;
 
     this._id = id;
@@ -43,7 +46,7 @@ export class DomainUnit<T = any, U = any> {
 
     this._domainModel = this.mapper.toDomain(this._persistenceModel);
 
-    return this;
+    return this as any;
   }
 
   getId() {

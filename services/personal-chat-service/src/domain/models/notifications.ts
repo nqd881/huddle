@@ -10,4 +10,10 @@ export class Notifications extends ValueObjectBase<NotificationsProps> {
 
   @Prop()
   declare muteUntil?: Date;
+
+  isMuted() {
+    if (!this.muteUntil) return false;
+
+    return Date.now() <= this.muteUntil.getTime();
+  }
 }

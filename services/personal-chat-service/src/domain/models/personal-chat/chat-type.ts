@@ -1,4 +1,4 @@
-import { Enum, EnumBase } from "ddd-node";
+import { Enum, EnumBase, EnumBuilder } from "ddd-node";
 
 export class ChatType extends EnumBase {
   @Enum("private")
@@ -10,3 +10,5 @@ export class ChatType extends EnumBase {
   @Enum("channel")
   static Channel: ChatType;
 }
+
+export const ChatTypeBuilder = () => new EnumBuilder(ChatType);

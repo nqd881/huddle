@@ -1,10 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { PersonalChat } from "../../../../domain/models/personal-chat/personal-chat";
-import { PersonalChatModel } from "./personal-chat.model";
-import { Id } from "ddd-node";
+import { StateAggregateBuilder } from "ddd-node";
 import { Notifications } from "../../../../domain/models/notifications";
+import {
+  ChatType,
+  ChatTypeBuilder,
+} from "../../../../domain/models/personal-chat/chat-type";
+import { PersonalChat } from "../../../../domain/models/personal-chat/personal-chat";
 import { IMapper } from "../../../interface/mapper";
-import { ChatType } from "../../../../domain/models/personal-chat/chat-type";
+import { PersonalChatModel } from "./personal-chat.model";
 
 @Injectable()
 export class PersonalChatMapper
@@ -13,25 +16,27 @@ export class PersonalChatMapper
   toDomain(persistenceModel: PersonalChatModel): PersonalChat {
     const { id, type, sourceChatId, ownerUserId, archived } = persistenceModel;
 
-    return PersonalChat.newAggregate(
-      {
-        sourceChatId: new Id(sourceChatId),
-        ownerUserId: new Id(ownerUserId),
-        type: ChatType.parse(type),
+    const builder = new StateAggregateBuilder(PersonalChat);
+
+    return builder
+      .withId(id)
+      .withProps({
+        sourceChatId,
+        ownerUserId,
+        type: ChatTypeBuilder().withValue(type).build(),
         notifications: Notifications.None,
         archived,
-      },
-      new Id(id)
-    );
+      })
+      .build();
   }
 
   toPersistence(domainModel: PersonalChat): PersonalChatModel {
     const { sourceChatId, ownerUserId, type, archived } = domainModel.props();
 
     return PersonalChatModel.build({
-      id: domainModel.id().value,
-      sourceChatId: sourceChatId.value,
-      ownerUserId: ownerUserId.value,
+      id: domainModel.id(),
+      sourceChatId,
+      ownerUserId,
       type: type.value,
       archived,
     });
